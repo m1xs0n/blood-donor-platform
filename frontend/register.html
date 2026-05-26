@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="uk">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Реєстрація</title>
+
+    <link
+        rel="stylesheet"
+        href="css/style.css"
+    >
+
+</head>
+
+<body class="auth-body">
+
+<main class="auth-shell">
+
+    <section class="auth-panel">
+
+        <div class="auth-brand">
+
+            <div class="auth-logo">
+                +
+            </div>
+
+            <h1>
+                Станьте частиною донорської мережі
+            </h1>
+
+            <p>
+                Створіть акаунт, заповніть профіль і допомагайте швидше знаходити потрібну кров.
+            </p>
+
+            <div class="auth-points">
+
+                <span>Швидка реєстрація</span>
+
+                <span>Email підтвердження</span>
+
+                <span>Безпечний доступ</span>
+
+            </div>
+
+        </div>
+
+        <div class="auth-card">
+
+            <p class="auth-eyebrow">
+                Новий акаунт
+            </p>
+
+            <h2>
+                Реєстрація
+            </h2>
+
+            <label for="full_name">
+                Ім'я
+            </label>
+
+            <input
+                type="text"
+                id="full_name"
+                placeholder="Ваше ім'я"
+                autocomplete="name"
+            >
+
+            <label for="email">
+                Email
+            </label>
+
+            <input
+                type="email"
+                id="email"
+                placeholder="your@email.com"
+                autocomplete="email"
+            >
+
+            <label for="password">
+                Пароль
+            </label>
+
+            <input
+                type="password"
+                id="password"
+                placeholder="Придумайте пароль"
+                autocomplete="new-password"
+            >
+
+            <button onclick="register()">
+                Зареєструватися
+            </button>
+
+            <p class="auth-switch">
+                Вже є акаунт?
+                <a href="login.html">Увійти</a>
+            </p>
+
+        </div>
+
+    </section>
+
+</main>
+
+<script src="js/auth.js"></script>
+
+</body>
+</html>

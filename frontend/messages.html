@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="uk">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Повідомлення</title>
+
+    <link
+        rel="stylesheet"
+        href="css/style.css"
+    >
+
+</head>
+
+<body>
+
+<script src="js/navbar.js"></script>
+
+<div class="dashboard-container messages-page">
+
+    <section class="admin-hero">
+
+        <div>
+
+            <p class="section-eyebrow">
+                Діалоги
+            </p>
+
+            <h1>
+                Повідомлення
+            </h1>
+
+            <p>
+                Спілкуйтеся з донорами та авторами заявок після відгуку на потребу крові.
+            </p>
+
+        </div>
+
+        <button
+            class="secondary-button"
+            onclick="loadConversations()"
+        >
+            Оновити
+        </button>
+
+    </section>
+
+    <div class="messages-layout">
+
+        <aside class="messages-sidebar">
+
+            <input
+                type="text"
+                id="conversation_search"
+                placeholder="Пошук діалогу..."
+                onkeyup="filterConversations()"
+            >
+
+            <div id="conversations_list"></div>
+
+        </aside>
+
+        <main class="messages-chat">
+
+            <div class="chat-header" id="chat_header">
+                Оберіть діалог
+            </div>
+
+            <div id="messages_list"></div>
+
+            <div class="chat-form">
+
+                <textarea
+                    id="message_input"
+                    placeholder="Напишіть повідомлення..."
+                ></textarea>
+
+                <button onclick="sendChatMessage()">
+                    Надіслати
+                </button>
+
+            </div>
+
+        </main>
+
+    </div>
+
+</div>
+
+<script src="js/messages.js"></script>
+
+</body>
+</html>

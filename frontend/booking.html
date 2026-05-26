@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="uk">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Бронювання</title>
+
+    <link
+        rel="stylesheet"
+        href="css/style.css"
+    >
+
+</head>
+
+<body>
+
+<script src="js/navbar.js"></script>
+
+<div class="dashboard-container">
+
+    <div class="card">
+
+        <h1>
+            Бронювання донації
+        </h1>
+
+        <p id="selected_request_text"></p>
+
+        <p
+            class="donation-warning"
+            id="donation_interval_warning"
+            style="display:none;"
+        ></p>
+
+        <button
+            class="secondary-button"
+            id="open_chat_button"
+            onclick="openSelectedChat()"
+            style="display:none;"
+        >
+            Перейти до діалогу
+        </button>
+
+        <select id="center_id"></select>
+
+        <input
+            type="date"
+            id="booking_date"
+        >
+
+        <input
+            type="time"
+            id="booking_time"
+        >
+
+        <button onclick="createBooking()">
+            Забронювати
+        </button>
+
+        <button
+            class="secondary-button"
+            onclick="window.location.href='bookings-list.html'"
+        >
+            Переглянути мої бронювання
+        </button>
+
+    </div>
+
+</div>
+
+<script src="js/booking.js"></script>
+
+</body>
+</html>

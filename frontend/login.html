@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="uk">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Вхід</title>
+
+    <link
+        rel="stylesheet"
+        href="css/style.css"
+    >
+
+</head>
+
+<body class="auth-body">
+
+<main class="auth-shell">
+
+    <section class="auth-panel">
+
+        <div class="auth-brand">
+
+            <div class="auth-logo">
+                +
+            </div>
+
+            <h1>
+                Blood Donor Platform
+            </h1>
+
+            <p>
+                Увійдіть, щоб створювати заявки, бронювати донації та керувати профілем донора.
+            </p>
+
+            <div class="auth-points">
+
+                <span>Заявки на кров</span>
+
+                <span>Бронювання центрів</span>
+
+                <span>Профіль донора</span>
+
+            </div>
+
+        </div>
+
+        <div class="auth-card">
+
+            <p class="auth-eyebrow">
+                Особистий кабінет
+            </p>
+
+            <h2>
+                Вхід
+            </h2>
+
+            <label for="login_email">
+                Email
+            </label>
+
+            <input
+                type="email"
+                id="login_email"
+                placeholder="your@email.com"
+                autocomplete="email"
+            >
+
+            <label for="login_password">
+                Пароль
+            </label>
+
+            <input
+                type="password"
+                id="login_password"
+                placeholder="Введіть пароль"
+                autocomplete="current-password"
+            >
+
+            <button onclick="login()">
+                Увійти
+            </button>
+
+            <p class="auth-switch">
+                Немає акаунта?
+                <a href="register.html">Зареєструватися</a>
+            </p>
+
+        </div>
+
+    </section>
+
+</main>
+
+<script src="js/auth.js"></script>
+
+</body>
+</html>

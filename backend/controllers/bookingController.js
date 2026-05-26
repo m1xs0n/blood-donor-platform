@@ -1,0 +1,225 @@
+const db = require('../config/db');
+
+const getTodayDate = () => {
+
+    const today = new Date();
+
+    const year =
+    today.getFullYear();
+
+    const month =
+    String(today.getMonth() + 1).padStart(2, '0');
+
+    const day =
+    String(today.getDate()).padStart(2, '0');
+
+    return `${year}-${month}-${day}`;
+};
+
+const isPastDate = (date) => {
+    return date < getTodayDate();
+};
+
+exports.createBooking = (req, res) => {
+
+    const userId = req.user.id;
+
+    const {
+        center_id,
+        booking_date,
+        booking_time,
+        request_id
+    } = req.body;
+
+    if (
+        !center_id ||
+        !booking_date ||
+        !booking_time
+    ) {
+
+        return res.status(400).json({
+            message: 'Заповніть всі поля'
+        });
+
+    }
+
+    if (isPastDate(booking_date)) {
+
+        return res.status(400).json({
+            message: 'Не можна створити бронювання в минулому'
+        });
+
+    }
+
+    db.query(
+        `INSERT INTO bookings
+        (
+            user_id,
+            request_id,
+            center_id,
+            booking_date,
+            booking_time
+        )
+        VALUES (?, ?, ?, ?, ?)`,
+        [
+            userId,
+            request_id || null,
+            center_id,
+            booking_date,
+            booking_time
+        ],
+        (err) => {
+
+            if (err) {
+
+                console.log(err);
+
+                return res.status(500).json({
+                    message: 'Помилка сервера'
+                });
+
+            }
+
+            res.json({
+                message:
+                'Бронювання створено'
+            });
+
+        }
+    );
+
+};
+
+exports.getBookings = (req, res) => {
+
+    const userId = req.user.id;
+
+    db.query(
+        `SELECT
+            bookings.*,
+            donation_centers.name
+            AS center_name
+
+        FROM bookings
+
+        JOIN donation_centers
+        ON bookings.center_id =
+        donation_centers.id
+
+        WHERE bookings.user_id = ?
+
+        ORDER BY booking_date ASC`,
+        [userId],
+        (err, results) => {
+
+            if (err) {
+
+                return res.status(500).json({
+                    message: 'Помилка сервера'
+                });
+
+            }
+
+            res.json(results);
+
+        }
+    );
+
+};
+
+exports.updateBooking = (req, res) => {
+
+    const userId = req.user.id;
+
+    const bookingId = req.params.id;
+
+    const {
+        center_id,
+        booking_date,
+        booking_time
+    } = req.body;
+
+    if (
+        !center_id ||
+        !booking_date ||
+        !booking_time
+    ) {
+
+        return res.status(400).json({
+            message: 'Заповніть всі поля'
+        });
+
+    }
+
+    if (isPastDate(booking_date)) {
+
+        return res.status(400).json({
+            message: 'Не можна перенести бронювання в минуле'
+        });
+
+    }
+
+    db.query(
+        `UPDATE bookings
+         SET
+            center_id = ?,
+            booking_date = ?,
+            booking_time = ?
+         WHERE id = ?
+         AND user_id = ?`,
+        [
+            center_id,
+            booking_date,
+            booking_time,
+            bookingId,
+            userId
+        ],
+        (err, result) => {
+
+            if (err) {
+
+                console.log(err);
+
+                return res.status(500).json({
+                    message: 'Помилка сервера'
+                });
+
+            }
+
+            if (result.affectedRows === 0) {
+
+                return res.status(404).json({
+                    message: 'Бронювання не знайдено'
+                });
+
+            }
+
+            res.json({
+                message: 'Бронювання оновлено'
+            });
+
+        }
+    );
+
+};
+
+exports.getCenters = (req, res) => {
+
+    db.query(
+        'SELECT * FROM donation_centers',
+        (err, results) => {
+
+            if (err) {
+
+                return res.status(500).json({
+                    message: 'Помилка сервера'
+                });
+
+            }
+
+            res.json(results);
+
+        }
+    );
+
+};

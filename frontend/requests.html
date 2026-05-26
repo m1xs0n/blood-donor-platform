@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="uk">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Створення заявки
+    </title>
+
+    <link
+        rel="stylesheet"
+        href="css/style.css"
+    >
+
+</head>
+
+<body>
+
+<script src="js/navbar.js"></script>
+
+<div class="dashboard-container">
+
+    <div class="card">
+
+        <h1>
+            Створення заявки
+        </h1>
+
+        <input
+            type="text"
+            id="title"
+            placeholder="Назва заявки"
+        >
+
+        <textarea
+            id="description"
+            placeholder="Опис потреби"
+        ></textarea>
+
+        <select id="blood_group">
+
+            <option value="">
+                Група крові
+            </option>
+
+            <option value="I">
+                I
+            </option>
+
+            <option value="II">
+                II
+            </option>
+
+            <option value="III">
+                III
+            </option>
+
+            <option value="IV">
+                IV
+            </option>
+
+        </select>
+        <select id="rh_factor">
+
+            <option value="">
+                Резус фактор
+            </option>
+
+            <option value="+">
+                Позитивний (+)
+            </option>
+
+            <option value="-">
+                Негативний (-)
+            </option>
+
+        </select>
+
+        <input
+            type="text"
+            id="city"
+            placeholder="Місто"
+        >
+
+        <select id="urgency">
+
+    <option value="normal">
+        Низька терміновість
+    </option>
+
+    <option value="urgent">
+        Середня терміновість
+    </option>
+
+    <option value="critical">
+        Висока терміновість
+    </option>
+
+</select>
+
+        <button onclick="createRequest()">
+            Створити заявку
+        </button>
+
+    </div>
+
+</div>
+
+<script src="js/requests.js"></script>
+
+</body>
+</html>

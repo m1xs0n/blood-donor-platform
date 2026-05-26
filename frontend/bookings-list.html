@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="uk">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Мої бронювання</title>
+
+    <link
+        rel="stylesheet"
+        href="css/style.css"
+    >
+
+</head>
+
+<body>
+
+<script src="js/navbar.js"></script>
+
+<div class="dashboard-container">
+
+    <div class="welcome-section">
+
+        <h1>
+            Мої бронювання
+        </h1>
+
+    </div>
+
+    <div class="card booking-tools">
+
+        <input
+            type="text"
+            id="booking_search"
+            placeholder="Пошук за центром або статусом..."
+            onkeyup="filterBookings()"
+        >
+
+        <select
+            id="booking_status_filter"
+            onchange="filterBookings()"
+        >
+
+            <option value="">
+                Всі статуси
+            </option>
+
+            <option value="pending">
+                Очікує
+            </option>
+
+            <option value="confirmed">
+                Підтверджено
+            </option>
+
+            <option value="cancelled">
+                Скасовано
+            </option>
+
+        </select>
+
+        <input
+            type="date"
+            id="booking_date_filter"
+            onchange="filterBookings()"
+        >
+
+    </div>
+
+    <div id="bookings_container"></div>
+
+</div>
+
+<div
+    class="drawer-overlay"
+    id="drawer_overlay"
+    onclick="closeBookingDrawer()"
+></div>
+
+<aside
+    class="booking-drawer"
+    id="booking_drawer"
+>
+
+    <div class="drawer-header">
+
+        <h2>
+            Редагування
+        </h2>
+
+        <button
+            class="icon-button"
+            onclick="closeBookingDrawer()"
+            type="button"
+        >
+            ×
+        </button>
+
+    </div>
+
+    <input
+        type="hidden"
+        id="edit_booking_id"
+    >
+
+    <label for="edit_center_id">
+        Центр донації
+    </label>
+
+    <select id="edit_center_id"></select>
+
+    <label for="edit_booking_date">
+        Дата
+    </label>
+
+    <input
+        type="date"
+        id="edit_booking_date"
+    >
+
+    <label for="edit_booking_time">
+        Час
+    </label>
+
+    <input
+        type="time"
+        id="edit_booking_time"
+    >
+
+    <button onclick="saveBookingChanges()">
+        Зберегти зміни
+    </button>
+
+</aside>
+
+<script src="js/bookings-list.js"></script>
+
+</body>
+</html>

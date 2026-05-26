@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="uk">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Адмін панель</title>
+
+    <link
+        rel="stylesheet"
+        href="css/style.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="https://unpkg.com/leaflet/dist/leaflet.css"
+    >
+
+</head>
+
+<body>
+
+<script src="js/navbar.js"></script>
+
+<div class="dashboard-container admin-page">
+
+    <section class="admin-hero">
+
+        <div>
+
+            <p class="section-eyebrow">
+                Адміністрування
+            </p>
+
+            <h1>
+                Панель керування БД
+            </h1>
+
+            <p>
+                Переглядайте, створюйте, редагуйте та видаляйте записи з таблиць бази даних.
+            </p>
+
+        </div>
+
+        <button
+            class="secondary-button"
+            onclick="loadCurrentTable()"
+        >
+            Оновити
+        </button>
+
+    </section>
+
+    <div class="admin-layout">
+
+        <aside class="admin-sidebar">
+
+            <h2>
+                Таблиці
+            </h2>
+
+            <div id="admin_tables"></div>
+
+        </aside>
+
+        <main class="admin-workspace">
+
+            <div class="admin-toolbar">
+
+                <div>
+
+                    <p class="section-eyebrow">
+                        Поточна таблиця
+                    </p>
+
+                    <h2 id="admin_table_title">
+                        Оберіть таблицю
+                    </h2>
+
+                </div>
+
+                <div class="admin-actions">
+
+                    <input
+                        type="text"
+                        id="admin_search"
+                        placeholder="Пошук у таблиці..."
+                        onkeyup="filterAdminRows()"
+                    >
+
+                    <button onclick="openAdminForm()">
+                        Додати запис
+                    </button>
+
+                </div>
+
+            </div>
+
+            <div
+                class="admin-table-wrap"
+                id="admin_table_container"
+            >
+                <p class="empty-state">
+                    Виберіть таблицю зліва.
+                </p>
+            </div>
+
+        </main>
+
+    </div>
+
+</div>
+
+<div
+    class="drawer-overlay"
+    id="admin_overlay"
+    onclick="closeAdminForm()"
+></div>
+
+<aside
+    class="booking-drawer admin-drawer"
+    id="admin_drawer"
+>
+
+    <div class="drawer-header">
+
+        <h2 id="admin_form_title">
+            Запис
+        </h2>
+
+        <button
+            class="icon-button"
+            onclick="closeAdminForm()"
+            type="button"
+        >
+            ×
+        </button>
+
+    </div>
+
+    <div id="admin_form_fields"></div>
+
+    <button onclick="saveAdminRow()">
+        Зберегти
+    </button>
+
+</aside>
+
+<div
+    class="admin-map-modal"
+    id="admin_map_modal"
+>
+
+    <div class="admin-map-card">
+
+        <div class="drawer-header">
+
+            <h2>
+                Вибір точки на карті
+            </h2>
+
+            <button
+                class="icon-button"
+                onclick="closeLocationPicker()"
+                type="button"
+            >
+                ×
+            </button>
+
+        </div>
+
+        <div id="admin_location_map"></div>
+
+        <p id="admin_location_text">
+            Натисніть на карту, щоб вибрати координати.
+        </p>
+
+        <button onclick="confirmLocationPicker()">
+            Підтягнути координати
+        </button>
+
+    </div>
+
+</div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<script src="js/admin.js"></script>
+
+</body>
+</html>

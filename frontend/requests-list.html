@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="uk">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Заявки донорів
+    </title>
+
+    <link
+        rel="stylesheet"
+        href="css/style.css"
+    >
+
+</head>
+
+<body>
+
+<script src="js/navbar.js"></script>
+
+<div class="dashboard-container">
+
+    <div class="welcome-section">
+
+        <h1>
+            Заявки на донорство
+        </h1>
+
+    </div>
+
+    <div class="card">
+
+        <input
+            type="text"
+            id="search_input"
+            placeholder="Пошук заявки..."
+            onkeyup="filterRequests()"
+        >
+
+        <select
+            id="urgency_filter"
+            onchange="filterRequests()"
+        >
+
+            <option value="">
+                Всі терміновості
+            </option>
+
+            <option value="normal">
+             Низька
+            </option>
+
+            <option value="urgent">
+                Середня
+            </option>
+
+            <option value="critical">
+                Висока
+            </option>
+
+        </select>
+
+    </div>
+
+    <div id="requests_container"></div>
+
+</div>
+
+<script src="js/requests-list.js"></script>
+
+</body>
+</html>
