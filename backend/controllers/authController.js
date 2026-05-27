@@ -27,6 +27,22 @@ const isValidCode = (code) => {
     return /^\d{6}$/.test(code);
 };
 
+const isValidRole = (role) => {
+    return ['donor', 'recipient'].includes(role);
+};
+
+const isValidDateOfBirth = (dateOfBirth) => {
+    const birthDate =
+    new Date(dateOfBirth);
+
+    const today =
+    new Date();
+
+    return Boolean(dateOfBirth) &&
+    !Number.isNaN(birthDate.getTime()) &&
+    birthDate < today;
+};
+
 const sendVerificationCode = async (email, verificationCode) => {
     await transporter.sendMail({
         from: process.env.EMAIL_USER,
@@ -47,7 +63,13 @@ exports.register = async (req, res) => {
         const {
             full_name,
             email,
-            password
+            password,
+            date_of_birth,
+            role,
+            city,
+            phone,
+            blood_group,
+            rh_factor
         } = req.body;
 
         const normalizedEmail =
@@ -56,10 +78,55 @@ exports.register = async (req, res) => {
         const normalizedName =
         String(full_name || '').trim();
 
+        const normalizedRole =
+        isValidRole(role)
+        ? role
+        : 'donor';
+
+        const normalizedCity =
+        String(city || '').trim();
+
+        const normalizedPhone =
+        String(phone || '').trim();
+
+        const missingFields = [];
+
+        if (!normalizedName) missingFields.push('ПІП');
+        if (!normalizedEmail) missingFields.push('Email');
+        if (!password) missingFields.push('Пароль');
+        if (!date_of_birth) missingFields.push('Дата народження');
+        if (!normalizedCity) missingFields.push('Місто');
+        if (!normalizedPhone) missingFields.push('Телефон');
+
+        if (
+            normalizedRole === 'donor' &&
+            !blood_group
+        ) {
+            missingFields.push('Група крові');
+        }
+
+        if (
+            normalizedRole === 'donor' &&
+            !rh_factor
+        ) {
+            missingFields.push('Резус фактор');
+        }
+
+        if (missingFields.length > 0) {
+
+            return res.status(400).json({
+                message: `Заповніть поля: ${missingFields.join(', ')}`
+            });
+
+        }
+
         if (
             !normalizedName ||
             !normalizedEmail ||
-            !password
+            !password ||
+            !date_of_birth ||
+            !normalizedCity ||
+            !normalizedPhone
         ) {
 
             return res.status(400).json({
@@ -88,6 +155,28 @@ exports.register = async (req, res) => {
 
             return res.status(400).json({
                 message: 'Пароль має містити щонайменше 6 символів'
+            });
+
+        }
+
+        if (!isValidDateOfBirth(date_of_birth)) {
+
+            return res.status(400).json({
+                message: 'Введіть коректну дату народження'
+            });
+
+        }
+
+        if (
+            normalizedRole === 'donor' &&
+            (
+                !blood_group ||
+                !rh_factor
+            )
+        ) {
+
+            return res.status(400).json({
+                message: 'Для донора потрібно вказати групу крові та резус фактор'
             });
 
         }
@@ -152,6 +241,18 @@ exports.register = async (req, res) => {
                         full_name: normalizedName,
                         email: normalizedEmail,
                         password: hashedPassword,
+                        role: normalizedRole,
+                        date_of_birth,
+                        city: normalizedCity,
+                        phone: normalizedPhone,
+                        blood_group:
+                        normalizedRole === 'donor'
+                        ? blood_group
+                        : null,
+                        rh_factor:
+                        normalizedRole === 'donor'
+                        ? rh_factor
+                        : null,
                         verificationCode
                     }
                 );
@@ -287,15 +388,17 @@ exports.verifyEmail = (req, res) => {
                     password,
                     is_verified,
                     verification_code,
-                    verification_attempts
+                    verification_attempts,
+                    role
                 )
-                VALUES (?, ?, ?, true, NULL, 0)`,
+                VALUES (?, ?, ?, true, NULL, 0, ?)`,
                 [
                     pendingRegistration.full_name,
                     pendingRegistration.email,
-                    pendingRegistration.password
+                    pendingRegistration.password,
+                    pendingRegistration.role
                 ],
-                (insertErr) => {
+                (insertErr, insertResult) => {
 
                     if (insertErr) {
 
@@ -307,7 +410,69 @@ exports.verifyEmail = (req, res) => {
 
                     }
 
-                    pendingRegistrations.delete(normalizedEmail);
+                    return db.query(
+                        `INSERT INTO donors
+                        (
+                            user_id,
+                            blood_group,
+                            rh_factor,
+                            date_of_birth,
+                            city,
+                            phone,
+                            health_status
+                        )
+                        VALUES (?, ?, ?, ?, ?, ?, ?)`,
+                        [
+                            insertResult.insertId,
+                            pendingRegistration.blood_group,
+                            pendingRegistration.rh_factor,
+                            pendingRegistration.date_of_birth,
+                            pendingRegistration.city,
+                            pendingRegistration.phone,
+                            null
+                        ],
+                        (profileErr) => {
+
+                            if (profileErr) {
+
+                                console.log(profileErr);
+
+                                return res.status(500).json({
+                                    message: 'Помилка створення профілю'
+                                });
+
+                            }
+
+                            pendingRegistrations.delete(normalizedEmail);
+
+                            const token = jwt.sign(
+                                {
+                                    id: insertResult.insertId,
+                                    role: pendingRegistration.role
+                                },
+                                process.env.JWT_SECRET,
+                                {
+                                    expiresIn: '7d'
+                                }
+                            );
+
+                            return res.json({
+                                message: 'Email підтверджено',
+                                token,
+                                user: {
+                                    id: insertResult.insertId,
+                                    full_name: pendingRegistration.full_name,
+                                    email: pendingRegistration.email,
+                                    role: pendingRegistration.role
+                                }
+                            });
+
+                            res.json({
+                                message: 'Email підтверджено'
+                            });
+
+                        }
+                    );
 
                     res.json({
                         message: 'Email підтверджено'

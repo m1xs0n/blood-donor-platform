@@ -15,7 +15,7 @@ L.tileLayer(
 async function loadCenters() {
 
     const response = await fetch(
-        'http://localhost:5000/api/map'
+        'https://blood-donor-platform-to9r.onrender.com/api/map'
     );
 
     const centers = await response.json();

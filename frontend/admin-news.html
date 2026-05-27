@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="uk">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Керування новинами</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+<script src="js/navbar.js"></script>
+
+<div class="dashboard-container admin-page">
+    <section class="admin-hero">
+        <div>
+            <p class="section-eyebrow">Контент сайту</p>
+            <h1>Керування новинами</h1>
+            <p>Створюйте новини для головної сторінки, сторінки новин і публічної частини сайту.</p>
+        </div>
+
+        <button onclick="openNewsForm()">Додати новину</button>
+    </section>
+
+    <div class="admin-news-layout">
+        <main>
+            <div class="admin-toolbar">
+                <div>
+                    <p class="section-eyebrow">Список</p>
+                    <h2>Новини</h2>
+                </div>
+
+                <input
+                    id="admin_news_search"
+                    type="text"
+                    placeholder="Пошук новини..."
+                >
+            </div>
+
+            <div id="admin_news_list" class="admin-news-list">
+                <p class="empty-state">Завантаження новин...</p>
+            </div>
+        </main>
+    </div>
+</div>
+
+<div
+    class="drawer-overlay"
+    id="news_overlay"
+    onclick="closeNewsForm()"
+></div>
+
+<aside
+    class="booking-drawer admin-drawer"
+    id="news_drawer"
+>
+    <div class="drawer-header">
+        <h2 id="news_form_title">Новина</h2>
+        <button class="icon-button" onclick="closeNewsForm()" type="button">x</button>
+    </div>
+
+    <form id="news_form" class="news-form">
+        <label>Заголовок</label>
+        <input id="news_title" type="text" required>
+
+        <label>Короткий опис</label>
+        <textarea id="news_summary" rows="3" maxlength="500"></textarea>
+
+        <label>Текст новини</label>
+        <textarea id="news_content" rows="9" required></textarea>
+
+        <label>Обкладинка</label>
+        <select id="news_template">
+            <option value="">Власне фото за URL</option>
+            <option value="template:attention">Увага</option>
+            <option value="template:update">Оновлення</option>
+            <option value="template:center">Новий донорський центр</option>
+        </select>
+
+        <label>URL фото</label>
+        <input id="news_image_url" type="text" placeholder="https://example.com/photo.jpg">
+
+        <label>Посилання на джерело або повну новину</label>
+        <input id="news_external_url" type="url" placeholder="https://example.com/news">
+
+        <label>Статус</label>
+        <select id="news_status">
+            <option value="published">Опубліковано</option>
+            <option value="draft">Чернетка</option>
+        </select>
+
+        <button type="submit">Зберегти</button>
+    </form>
+</aside>
+
+<script src="js/admin-news.js"></script>
+
+</body>
+</html>

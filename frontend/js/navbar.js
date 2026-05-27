@@ -1,62 +1,75 @@
+function navLink(href, text, extra = '') {
+
+    return `
+        <a href="${href}" ${extra}>
+            ${text}
+        </a>
+    `;
+}
+
 function renderNavbar() {
 
-    const navbar = document.createElement('div');
+    const navbar =
+    document.createElement('div');
 
     const user =
     JSON.parse(localStorage.getItem('user') || 'null');
 
-    const adminLink =
-    user && user.role === 'admin'
-    ? `
-        <a href="admin.html">
-            Адмінка
-        </a>
-    `
-    : '';
+    const role =
+    user?.role || 'donor';
+
+    let links = [
+        navLink('dashboard.html', 'Кабінет')
+    ];
+
+    if (role === 'donor') {
+
+        links = links.concat([
+            navLink('requests-list.html', 'Заявки'),
+            navLink('bookings-list.html', 'Мої бронювання'),
+            navLink('messages.html', 'Повідомлення'),
+            navLink('map.html', 'Карта')
+        ]);
+    }
+
+    if (role === 'recipient') {
+
+        links = links.concat([
+            navLink('requests.html', 'Створити заявку'),
+            navLink('requests-list.html', 'Заявки'),
+            navLink('messages.html', 'Повідомлення'),
+            navLink('map.html', 'Карта')
+        ]);
+    }
+
+    if (role === 'admin') {
+
+        links = links.concat([
+            navLink('requests.html', 'Створити заявку'),
+            navLink('requests-list.html', 'Заявки'),
+            navLink('bookings-list.html', 'Мої бронювання'),
+            navLink('messages.html', 'Повідомлення'),
+            navLink('map.html', 'Карта'),
+            navLink('admin.html', 'Адміністрування'),
+            navLink('admin-news.html', 'Контент сайту')
+        ]);
+    }
+
+    links.push(
+        navLink('#', 'Вийти', 'onclick="logout(); return false;"')
+    );
 
     navbar.className = 'navbar';
 
     navbar.innerHTML = `
+        <div class="nav-logo">
+            Blood Donor Platform
+        </div>
 
-    <div class="nav-logo">
-        Blood Donor Platform
-    </div>
-
-    <div class="nav-links">
-
-        <a href="dashboard.html">
-            Dashboard
-        </a>
-
-        <a href="requests.html">
-            Створити заявку
-        </a>
-
-        <a href="requests-list.html">
-            Заявки
-        </a>
-
-        <a href="bookings-list.html">
-            Мої бронювання
-        </a>
-
-        <a href="messages.html">
-            Повідомлення
-        </a>
-
-        <a href="map.html">
-            Карта
-        </a>
-
-        ${adminLink}
-
-        <a href="#"
-           onclick="logout()">
-            Вийти
-        </a>
-
-    </div>
-`;
+        <div class="nav-links">
+            ${links.join('')}
+        </div>
+    `;
 
     document.body.prepend(navbar);
 }
@@ -64,7 +77,6 @@ function renderNavbar() {
 function logout() {
 
     localStorage.removeItem('token');
-
     localStorage.removeItem('user');
 
     window.location.href =
@@ -74,8 +86,6 @@ function logout() {
 document.addEventListener(
     'DOMContentLoaded',
     () => {
-
         renderNavbar();
-
     }
 );

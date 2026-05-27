@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:5000/api/auth';
+const API_URL = 'https://blood-donor-platform-to9r.onrender.com/api/auth';
 
 function isValidEmail(email) {
 
@@ -20,6 +20,42 @@ function isValidCode(code) {
     return /^\d{6}$/.test(code);
 }
 
+function isValidDateOfBirth(dateOfBirth) {
+
+    if (!dateOfBirth) {
+
+        return false;
+    }
+
+    const birthDate =
+    new Date(dateOfBirth);
+
+    const today =
+    new Date();
+
+    return !Number.isNaN(birthDate.getTime()) &&
+    birthDate < today;
+}
+
+function toggleRegisterRoleFields() {
+
+    const role =
+    document.getElementById('role')?.value;
+
+    const donorFields =
+    document.getElementById('donor_register_fields');
+
+    if (!donorFields) {
+
+        return;
+    }
+
+    donorFields.style.display =
+    role === 'donor'
+    ? 'block'
+    : 'none';
+}
+
 async function register() {
 
     const full_name =
@@ -31,14 +67,77 @@ async function register() {
     const password =
     document.getElementById('password').value;
 
+    const date_of_birth =
+    document.getElementById('date_of_birth').value;
+
+    const role =
+    document.getElementById('role').value;
+
+    const city =
+    document.getElementById('city').value.trim();
+
+    const phone =
+    document.getElementById('phone').value.trim();
+
+    const blood_group =
+    document.getElementById('blood_group').value;
+
+    const rh_factor =
+    document.getElementById('rh_factor').value;
+
+    const missingFields = [];
+
+    if (!full_name) missingFields.push('ПІП');
+    if (!date_of_birth) missingFields.push('Дата народження');
+    if (!role) missingFields.push('Тип акаунта');
+    if (!city) missingFields.push('Місто');
+    if (!phone) missingFields.push('Телефон');
+    if (!email) missingFields.push('Email');
+    if (!password) missingFields.push('Пароль');
+
+    if (missingFields.length > 0) {
+
+        alert(`Заповніть поля: ${missingFields.join(', ')}`);
+
+        return;
+    }
+
     if (
         !full_name ||
         !email ||
-        !password
+        !password ||
+        !date_of_birth ||
+        !role ||
+        !city ||
+        !phone
     ) {
 
         alert(
             'Заповніть всі поля'
+        );
+
+        return;
+    }
+
+    if (!isValidDateOfBirth(date_of_birth)) {
+
+        alert(
+            'Введіть коректну дату народження'
+        );
+
+        return;
+    }
+
+    if (
+        role === 'donor' &&
+        (
+            !blood_group ||
+            !rh_factor
+        )
+    ) {
+
+        alert(
+            'Для донора потрібно вказати групу крові та резус фактор'
         );
 
         return;
@@ -83,7 +182,13 @@ async function register() {
             body: JSON.stringify({
                 full_name,
                 email,
-                password
+                password,
+                date_of_birth,
+                role,
+                city,
+                phone,
+                blood_group,
+                rh_factor
             })
         }
     );
@@ -104,6 +209,13 @@ async function register() {
     }
 }
 
+document.addEventListener(
+    'DOMContentLoaded',
+    () => {
+        toggleRegisterRoleFields();
+    }
+);
+
 async function verifyEmail() {
 
     const email =
@@ -115,6 +227,13 @@ async function verifyEmail() {
     document.getElementById(
         'verify_code'
     ).value.trim();
+
+    if (!code) {
+
+        alert('Заповніть поле: Код підтвердження');
+
+        return;
+    }
 
     if (!email) {
 
@@ -171,6 +290,23 @@ async function verifyEmail() {
         localStorage.removeItem(
             'verification_email'
         );
+
+        if (data.token && data.user) {
+
+            localStorage.setItem(
+                'token',
+                data.token
+            );
+
+            localStorage.setItem(
+                'user',
+                JSON.stringify(data.user)
+            );
+
+            window.location.href = 'dashboard.html';
+
+            return;
+        }
 
         window.location.href = 'login.html';
     }

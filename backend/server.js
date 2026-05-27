@@ -44,3 +44,7 @@ app.use('/api/admin', adminRoutes);
 const messageRoutes =
 require('./routes/messageRoutes');
 app.use('/api/messages', messageRoutes);
+
+const newsRoutes =
+require('./routes/newsRoutes');
+app.use('/api/news', newsRoutes);

@@ -1,8 +1,11 @@
 const API_URL =
-'http://localhost:5000/api/requests';
+'https://blood-donor-platform-to9r.onrender.com/api/requests';
 
 const token =
 localStorage.getItem('token');
+
+const requestUser =
+JSON.parse(localStorage.getItem('user') || 'null');
 
 if (!token) {
 
@@ -109,4 +112,14 @@ async function createRequest() {
             'Помилка створення заявки'
         );
     }
+}
+
+if (requestUser && requestUser.role === 'donor') {
+
+    alert(
+        'Створення заявок доступне реципієнтам'
+    );
+
+    window.location.href =
+    'dashboard.html';
 }

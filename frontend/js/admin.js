@@ -1,5 +1,5 @@
 const ADMIN_API =
-'http://localhost:5000/api/admin';
+'https://blood-donor-platform-to9r.onrender.com/api/admin';
 
 const adminToken =
 localStorage.getItem('token');
@@ -20,6 +20,576 @@ let adminLocationMap = null;
 let adminLocationMarker = null;
 
 let selectedLocation = null;
+
+let adminReferenceRows = {};
+
+let activeReferenceField = null;
+
+const tableLabels = {
+    users: 'Користувачі',
+    donors: 'Профілі донорів/реципієнтів',
+    blood_requests: 'Заявки на кров',
+    bookings: 'Бронювання',
+    donation_centers: 'Центри здачі крові',
+    notifications: 'Повідомлення',
+    hospitals: 'Лікарні',
+    news: 'Новини'
+};
+
+const fieldLabels = {
+    id: 'ID запису',
+    user_id: 'ID користувача',
+    created_by: 'Автор заявки',
+    patient_id: 'Пацієнт / реципієнт',
+    full_name: 'ПІП',
+    email: 'Email',
+    password: 'Пароль',
+    role: 'Роль користувача',
+    created_at: 'Дата створення',
+    updated_at: 'Дата оновлення',
+    verification_code: 'Код підтвердження',
+    is_verified: 'Email підтверджено',
+    verification_attempts: 'Спроби підтвердження',
+    blood_group: 'Група крові',
+    rh_factor: 'Резус фактор',
+    date_of_birth: 'Дата народження',
+    city: 'Місто',
+    phone: 'Телефон',
+    health_status: 'Стан здоровʼя',
+    last_donation_date: 'Остання здача крові',
+    title: 'Заголовок',
+    description: 'Опис',
+    urgency: 'Терміновість',
+    status: 'Статус',
+    request_id: 'Заявка',
+    center_id: 'Центр крові',
+    booking_date: 'Дата бронювання',
+    booking_time: 'Час бронювання',
+    name: 'Назва',
+    address: 'Адреса',
+    latitude: 'Широта',
+    longitude: 'Довгота',
+    sender_id: 'Відправник',
+    receiver_id: 'Отримувач',
+    type: 'Тип',
+    message: 'Повідомлення',
+    summary: 'Короткий опис',
+    content: 'Текст',
+    image_url: 'Фото / шаблон',
+    external_url: 'Посилання'
+};
+
+const valueLabels = {
+    role: {
+        donor: 'Донор',
+        recipient: 'Реципієнт',
+        admin: 'Адміністратор'
+    },
+    urgency: {
+        normal: 'Низька',
+        urgent: 'Середня',
+        critical: 'Висока'
+    },
+    status: {
+        pending: 'Очікує',
+        confirmed: 'Підтверджено',
+        completed: 'Виконано',
+        cancelled: 'Скасовано',
+        published: 'Опубліковано',
+        draft: 'Чернетка'
+    },
+    type: {
+        notification: 'Сповіщення',
+        message: 'Повідомлення'
+    },
+    is_verified: {
+        0: 'Ні',
+        1: 'Так'
+    }
+};
+
+valueLabels.is_read = {
+    0: 'Ні',
+    1: 'Так'
+};
+
+const fieldOptions = {
+    role: [
+        { value: 'donor', label: 'Донор' },
+        { value: 'recipient', label: 'Реципієнт' },
+        { value: 'admin', label: 'Адміністратор' }
+    ],
+    blood_group: [
+        { value: 'I', label: 'I' },
+        { value: 'II', label: 'II' },
+        { value: 'III', label: 'III' },
+        { value: 'IV', label: 'IV' }
+    ],
+    rh_factor: [
+        { value: '+', label: 'Позитивний (+)' },
+        { value: '-', label: 'Негативний (-)' }
+    ],
+    urgency: [
+        { value: 'normal', label: 'Низька' },
+        { value: 'urgent', label: 'Середня' },
+        { value: 'critical', label: 'Висока' }
+    ],
+    status: [
+        { value: 'pending', label: 'Очікує' },
+        { value: 'confirmed', label: 'Підтверджено' },
+        { value: 'completed', label: 'Виконано' },
+        { value: 'cancelled', label: 'Скасовано' },
+        { value: 'published', label: 'Опубліковано' },
+        { value: 'draft', label: 'Чернетка' }
+    ],
+    type: [
+        { value: 'notification', label: 'Сповіщення' },
+        { value: 'message', label: 'Повідомлення' }
+    ],
+    is_verified: [
+        { value: '0', label: 'Ні' },
+        { value: '1', label: 'Так' }
+    ]
+};
+
+fieldOptions.is_read = [
+    { value: '0', label: 'Ні' },
+    { value: '1', label: 'Так' }
+];
+
+function getFieldOptions(column) {
+
+    if (column.name === 'status') {
+
+        if (currentTable && currentTable.name === 'news') {
+            return [
+                { value: 'published', label: 'Опубліковано' },
+                { value: 'draft', label: 'Чернетка' }
+            ];
+        }
+
+        if (currentTable && currentTable.name === 'blood_requests') {
+            return [
+                { value: 'active', label: 'Активна' },
+                { value: 'completed', label: 'Виконана' },
+                { value: 'cancelled', label: 'Скасована' }
+            ];
+        }
+
+        if (currentTable && currentTable.name === 'bookings') {
+            return [
+                { value: 'pending', label: 'Очікує' },
+                { value: 'approved', label: 'Підтверджено' },
+                { value: 'completed', label: 'Виконано' },
+                { value: 'cancelled', label: 'Скасовано' }
+            ];
+        }
+    }
+
+    return fieldOptions[column.name] || null;
+}
+
+const referenceFields = {
+    user_id: 'users',
+    created_by: 'users',
+    patient_id: 'users',
+    sender_id: 'users',
+    receiver_id: 'users',
+    request_id: 'blood_requests',
+    center_id: 'donation_centers',
+    hospital_id: 'hospitals'
+};
+
+function getReferenceTable(columnName) {
+
+    return referenceFields[columnName] || null;
+}
+
+function getReferenceLabel(tableName, row) {
+
+    if (!row) {
+
+        return '';
+    }
+
+    if (tableName === 'users') {
+
+        return row.full_name || row.email || 'Користувач';
+    }
+
+    if (tableName === 'blood_requests') {
+
+        return row.title || 'Заявка';
+    }
+
+    if (tableName === 'donation_centers' || tableName === 'hospitals') {
+
+        return row.name || 'Запис';
+    }
+
+    return row.name || row.title || 'Запис';
+}
+
+function getReferenceDisplay(columnName, value) {
+
+    const tableName =
+    getReferenceTable(columnName);
+
+    if (!tableName || !value) {
+
+        return valueToText(value);
+    }
+
+    const rows =
+    adminReferenceRows[tableName] || [];
+
+    const row =
+    rows.find((item) => {
+        return String(item.id) === String(value);
+    });
+
+    if (!row) {
+
+        return valueToText(value);
+    }
+
+    return getReferenceLabel(tableName, row);
+}
+
+function parseReferenceValue(columnName, value) {
+
+    if (!getReferenceTable(columnName)) {
+
+        return value;
+    }
+
+    return value;
+}
+
+function getReferenceInputLabel(columnName, value) {
+
+    const label =
+    getReferenceDisplay(columnName, value);
+
+    return label || 'Не вибрано';
+}
+
+function openReferencePicker(columnName) {
+
+    activeReferenceField =
+    columnName;
+
+    const tableName =
+    getReferenceTable(columnName);
+
+    if (!tableName) {
+
+        return;
+    }
+
+    document.getElementById(
+        'admin_reference_title'
+    ).innerText =
+    `Вибір: ${getFieldLabel(columnName)}`;
+
+    document.getElementById(
+        'admin_reference_search'
+    ).value = '';
+
+    document.getElementById(
+        'admin_reference_modal'
+    ).classList.add('active');
+
+    renderReferencePickerRows();
+}
+
+function closeReferencePicker() {
+
+    document.getElementById(
+        'admin_reference_modal'
+    ).classList.remove('active');
+
+    activeReferenceField = null;
+}
+
+function renderReferencePickerRows() {
+
+    const container =
+    document.getElementById(
+        'admin_reference_list'
+    );
+
+    const search =
+    document.getElementById(
+        'admin_reference_search'
+    ).value.toLowerCase();
+
+    const tableName =
+    getReferenceTable(activeReferenceField);
+
+    const rows =
+    adminReferenceRows[tableName] || [];
+
+    const filtered =
+    rows.filter((row) => {
+        const text = [
+            getReferenceLabel(tableName, row),
+            row.email,
+            row.city,
+            row.phone,
+            row.title,
+            row.name,
+            row.id
+        ]
+        .join(' ')
+        .toLowerCase();
+
+        return text.includes(search);
+    });
+
+    if (filtered.length === 0) {
+
+        container.innerHTML = `
+            <p class="empty-state">Нічого не знайдено.</p>
+        `;
+
+        return;
+    }
+
+    container.innerHTML =
+    filtered.map((row) => {
+        const details = [
+            row.email,
+            row.city,
+            row.phone,
+            row.address
+        ]
+        .filter(Boolean)
+        .join(' · ');
+
+        return `
+            <button
+                type="button"
+                class="admin-reference-option"
+                onclick="selectReferenceValue('${row.id}')"
+            >
+                <strong>${escapeHtml(getReferenceLabel(tableName, row))}</strong>
+                ${details ? `<span>${escapeHtml(details)}</span>` : ''}
+            </button>
+        `;
+    }).join('');
+}
+
+function selectReferenceValue(value) {
+
+    const input =
+    document.getElementById(
+        `admin_field_${activeReferenceField}`
+    );
+
+    const label =
+    document.getElementById(
+        `admin_ref_label_${activeReferenceField}`
+    );
+
+    if (!input || !label) {
+
+        closeReferencePicker();
+
+        return;
+    }
+
+    input.value =
+    value;
+
+    label.value =
+    getReferenceInputLabel(
+        activeReferenceField,
+        value
+    );
+
+    closeReferencePicker();
+}
+
+function getInputType(column) {
+
+    if (
+        column.name.includes('date') ||
+        column.type === 'date'
+    ) {
+
+        return 'date';
+    }
+
+    if (column.name.includes('time')) {
+
+        return 'time';
+    }
+
+    if (
+        column.type === 'int' ||
+        column.type === 'decimal' ||
+        column.type === 'float' ||
+        column.type === 'double'
+    ) {
+
+        return 'number';
+    }
+
+    if (column.name === 'email') {
+
+        return 'email';
+    }
+
+    return 'text';
+}
+
+function renderAdminInput(column, value, isAuto) {
+
+    const referenceTable =
+    getReferenceTable(column.name);
+
+    if (referenceTable) {
+
+        const currentValue =
+        valueToText(value);
+
+        return `
+            <div class="admin-reference-field">
+                <input
+                    type="text"
+                    id="admin_ref_label_${column.name}"
+                    value="${escapeHtml(getReferenceInputLabel(column.name, currentValue))}"
+                    disabled
+                >
+
+                <button
+                    type="button"
+                    class="secondary-button"
+                    onclick="openReferencePicker('${column.name}')"
+                    ${isAuto ? 'disabled' : ''}
+                >
+                    Вибрати
+                </button>
+            </div>
+
+            <input
+                type="hidden"
+                id="admin_field_${column.name}"
+                value="${escapeHtml(currentValue)}"
+                ${isAuto ? 'disabled' : ''}
+            >
+        `;
+    }
+
+    const options =
+    getFieldOptions(column);
+
+    if (options) {
+
+        return `
+            <select
+                id="admin_field_${column.name}"
+                ${isAuto ? 'disabled' : ''}
+            >
+                <option value="">Не вказано</option>
+                ${options.map((option) => {
+                    const selected =
+                    String(value) === String(option.value)
+                    ? 'selected'
+                    : '';
+
+                    return `
+                        <option
+                            value="${escapeHtml(option.value)}"
+                            ${selected}
+                        >
+                            ${escapeHtml(option.label)}
+                        </option>
+                    `;
+                }).join('')}
+            </select>
+        `;
+    }
+
+    const inputType =
+    getInputType(column);
+
+    return `
+        <input
+            type="${inputType}"
+            id="admin_field_${column.name}"
+            value="${escapeHtml(value)}"
+            ${isAuto ? 'disabled' : ''}
+        >
+    `;
+}
+
+function getTableLabel(tableName) {
+
+    return tableLabels[tableName] || tableName;
+}
+
+function getFieldLabel(fieldName) {
+
+    return fieldLabels[fieldName] || fieldName;
+}
+
+function formatAdminValue(columnName, value) {
+
+    if (value === null || value === undefined || value === '') {
+
+        return '';
+    }
+
+    const referenceDisplay =
+    getReferenceDisplay(columnName, value);
+
+    if (referenceDisplay !== valueToText(value)) {
+
+        return referenceDisplay;
+    }
+
+    if (columnName === 'status') {
+
+        const statusOptions =
+        getFieldOptions({ name: 'status' }) || [];
+
+        const statusOption =
+        statusOptions.find((option) => {
+            return String(option.value) === String(value);
+        });
+
+        if (statusOption) {
+
+            return statusOption.label;
+        }
+    }
+
+    const labels =
+    valueLabels[columnName];
+
+    if (labels && labels[value] !== undefined) {
+
+        return labels[value];
+    }
+
+    if (
+        columnName.includes('date') ||
+        columnName.endsWith('_at')
+    ) {
+
+        const date =
+        new Date(value);
+
+        if (!Number.isNaN(date.getTime())) {
+
+            return date.toLocaleString('uk-UA');
+        }
+    }
+
+    return valueToText(value);
+}
 
 if (
     !adminToken ||
@@ -120,11 +690,54 @@ function renderTableButtons() {
                 class="admin-table-button ${activeClass}"
                 onclick="selectAdminTable('${table.name}')"
             >
-                ${escapeHtml(table.name)}
+                ${escapeHtml(getTableLabel(table.name))}
             </button>
         `;
 
     });
+}
+
+async function loadAdminReferences() {
+
+    const referenceTables = [
+        'users',
+        'blood_requests',
+        'donation_centers',
+        'hospitals'
+    ];
+
+    const availableTables =
+    adminTables.map((table) => {
+        return table.name;
+    });
+
+    await Promise.all(
+        referenceTables
+        .filter((tableName) => {
+            return availableTables.includes(tableName);
+        })
+        .map(async (tableName) => {
+            try {
+
+                const response =
+                await adminFetch(
+                    `${ADMIN_API}/tables/${encodeURIComponent(tableName)}/rows`
+                );
+
+                const data =
+                await response.json();
+
+                adminReferenceRows[tableName] =
+                data.rows || [];
+
+            } catch (error) {
+
+                console.log(error);
+
+                adminReferenceRows[tableName] = [];
+            }
+        })
+    );
 }
 
 async function loadAdminTables() {
@@ -136,6 +749,8 @@ async function loadAdminTables() {
 
     adminTables =
     await response.json();
+
+    await loadAdminReferences();
 
     renderTableButtons();
 
@@ -157,7 +772,7 @@ async function selectAdminTable(tableName) {
     document.getElementById(
         'admin_table_title'
     ).innerText =
-    tableName;
+    getTableLabel(tableName);
 
     document.getElementById(
         'admin_search'
@@ -191,6 +806,19 @@ async function loadCurrentTable() {
 
     currentRows =
     data.rows || [];
+
+    if (
+        [
+            'users',
+            'blood_requests',
+            'donation_centers',
+            'hospitals'
+        ].includes(currentTable.name)
+    ) {
+
+        adminReferenceRows[currentTable.name] =
+        currentRows;
+    }
 
     renderAdminRows(currentRows);
 }
@@ -228,7 +856,7 @@ function renderAdminRows(rows) {
             <thead>
                 <tr>
                     ${columns.map((column) => {
-                        return `<th>${escapeHtml(column.name)}</th>`;
+                        return `<th>${escapeHtml(getFieldLabel(column.name))}</th>`;
                     }).join('')}
                     <th>Дії</th>
                 </tr>
@@ -241,7 +869,7 @@ function renderAdminRows(rows) {
                             ${columns.map((column) => {
                                 return `
                                     <td>
-                                        ${escapeHtml(row[column.name])}
+                                        ${escapeHtml(formatAdminValue(column.name, row[column.name]))}
                                     </td>
                                 `;
                             }).join('')}
@@ -259,7 +887,7 @@ function renderAdminRows(rows) {
                                             Видалити
                                         </button>
                                     `
-                                    : 'Немає primary key'
+                                    : 'Немає ключового поля'
                                 }
                             </td>
                         </tr>
@@ -280,8 +908,8 @@ function filterAdminRows() {
     const filtered =
     currentRows.filter((row) => {
 
-        return Object.values(row).some((value) => {
-            return valueToText(value)
+        return currentTable.columns.some((column) => {
+            return formatAdminValue(column.name, row[column.name])
             .toLowerCase()
             .includes(search);
         });
@@ -334,16 +962,11 @@ function openAdminForm(rowIndex = null) {
 
         fields.innerHTML += `
             <label for="admin_field_${column.name}">
-                ${escapeHtml(column.name)}
-                <span>${escapeHtml(column.type)}</span>
+                ${escapeHtml(getFieldLabel(column.name))}
+                <span>${escapeHtml(column.name)}</span>
             </label>
 
-            <input
-                type="text"
-                id="admin_field_${column.name}"
-                value="${escapeHtml(value)}"
-                ${isAuto ? 'disabled' : ''}
-            >
+            ${renderAdminInput(column, value, isAuto)}
         `;
 
     });
@@ -587,7 +1210,10 @@ function collectAdminFormData() {
         if (input && !input.disabled) {
 
             data[column.name] =
-            input.value;
+            parseReferenceValue(
+                column.name,
+                input.value
+            );
 
         }
 
@@ -610,7 +1236,7 @@ async function saveAdminRow() {
     if (isEditing && !primaryKey) {
 
         alert(
-            'У таблиці немає primary key'
+            'У таблиці немає ключового поля'
         );
 
         return;
@@ -652,7 +1278,7 @@ async function deleteAdminRow(rowIndex) {
     if (!primaryKey) {
 
         alert(
-            'У таблиці немає primary key'
+            'У таблиці немає ключового поля'
         );
 
         return;
@@ -660,7 +1286,7 @@ async function deleteAdminRow(rowIndex) {
 
     const confirmed =
     confirm(
-        `Видалити запис #${row[primaryKey]} з таблиці ${currentTable.name}?`
+        `Видалити запис #${row[primaryKey]} з таблиці "${getTableLabel(currentTable.name)}"?`
     );
 
     if (!confirmed) {

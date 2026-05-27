@@ -1,11 +1,14 @@
 const API_URL =
-'http://localhost:5000/api/requests';
+'https://blood-donor-platform-to9r.onrender.com/api/requests';
 
 const DONOR_API_URL =
-'http://localhost:5000/api/donor/profile';
+'https://blood-donor-platform-to9r.onrender.com/api/donor/profile';
 
 const token =
 localStorage.getItem('token');
+
+const currentUser =
+JSON.parse(localStorage.getItem('user') || 'null');
 
 let allRequests = [];
 
@@ -15,6 +18,24 @@ if (!token) {
 
     window.location.href =
     'login.html';
+}
+
+if (currentUser && currentUser.role === 'recipient') {
+
+    const notice =
+    document.createElement('div');
+
+    notice.className =
+    'request-view-notice';
+
+    notice.innerText =
+    'Ви можете переглядати заявки, але відповідати на них можуть лише донори.';
+
+    document.querySelector('.dashboard-container')
+    .insertBefore(
+        notice,
+        document.getElementById('requests_container')
+    );
 }
 
 function normalizeBloodGroup(value) {
@@ -108,7 +129,15 @@ function getRequestCompatibility(request) {
     };
 }
 
-function sortRequestsForDonor(requests) {
+function sortRequestsForUser(requests) {
+
+    if (currentUser && currentUser.role === 'recipient') {
+
+        return [...requests].sort((first, second) => {
+            return new Date(second.created_at || 0) -
+            new Date(first.created_at || 0);
+        });
+    }
 
     return [...requests].sort((first, second) => {
 
@@ -158,7 +187,10 @@ async function loadRequests() {
 
     try {
 
-        await loadDonorProfile();
+        if (!currentUser || currentUser.role !== 'recipient') {
+
+            await loadDonorProfile();
+        }
 
         const response = await fetch(
             API_URL,
@@ -231,17 +263,19 @@ function renderRequests(requests) {
         return;
     }
 
-    sortRequestsForDonor(requests).forEach((request) => {
+    sortRequestsForUser(requests).forEach((request) => {
 
         const compatibility =
-        getRequestCompatibility(request);
+        currentUser && currentUser.role === 'recipient'
+        ? null
+        : getRequestCompatibility(request);
 
         const urgencyColor =
         getUrgencyColor(request.urgency);
 
         container.innerHTML += `
 
-            <div class="request-card request-card-${compatibility.status}">
+            <div class="request-card ${compatibility ? `request-card-${compatibility.status}` : ''}">
 
                 <div class="request-card-header">
 
@@ -258,9 +292,15 @@ function renderRequests(requests) {
                             ${request.urgency || '-'}
                         </span>
 
-                        <span class="compatibility-badge compatibility-${compatibility.status}">
-                            ${compatibility.label}
-                        </span>
+                        ${
+                            compatibility
+                            ? `
+                                <span class="compatibility-badge compatibility-${compatibility.status}">
+                                    ${compatibility.label}
+                                </span>
+                            `
+                            : ''
+                        }
 
                     </div>
 
@@ -298,12 +338,22 @@ function renderRequests(requests) {
                     </strong>
                 </p>
 
-                <button
-                    style="margin-top:20px;"
-                    onclick="respondRequest(${request.id})"
-                >
-                    Допомогти
-                </button>
+                ${
+                    currentUser && currentUser.role === 'recipient'
+                    ? `
+                        <p class="recipient-request-note">
+                            Відповідь на заявку доступна лише донорам.
+                        </p>
+                    `
+                    : `
+                        <button
+                            style="margin-top:20px;"
+                            onclick="respondRequest(${request.id})"
+                        >
+                            Допомогти
+                        </button>
+                    `
+                }
 
             </div>
         `;

@@ -62,7 +62,7 @@
             </h2>
 
             <label for="full_name">
-                Ім'я
+                Ім'я, Прізвище, По батькові
             </label>
 
             <input
@@ -71,6 +71,73 @@
                 placeholder="Ваше ім'я"
                 autocomplete="name"
             >
+
+            <label for="date_of_birth">
+                Дата народження
+            </label>
+
+            <input
+                type="date"
+                id="date_of_birth"
+            >
+
+            <label for="role">
+                Тип акаунта
+            </label>
+
+            <select
+                id="role"
+                onchange="toggleRegisterRoleFields()"
+            >
+                <option value="donor">Донор</option>
+                <option value="recipient">Реципієнт</option>
+            </select>
+
+            <label for="city">
+                Місто
+            </label>
+
+            <input
+                type="text"
+                id="city"
+                placeholder="Ваше місто"
+            >
+
+            <label for="phone">
+                Телефон
+            </label>
+
+            <input
+                type="text"
+                id="phone"
+                placeholder="+380..."
+            >
+
+            <div id="donor_register_fields">
+
+                <label for="blood_group">
+                    Група крові
+                </label>
+
+                <select id="blood_group">
+                    <option value="">Оберіть групу крові</option>
+                    <option value="I">I</option>
+                    <option value="II">II</option>
+                    <option value="III">III</option>
+                    <option value="IV">IV</option>
+                </select>
+
+                <label for="rh_factor">
+                    Резус фактор
+                </label>
+
+                <select id="rh_factor">
+                    <option value="">Оберіть резус</option>
+                    <option value="+">Позитивний (+)</option>
+                    <option value="-">Негативний (-)</option>
+                </select>
+
+            </div>
 
             <label for="email">
                 Email

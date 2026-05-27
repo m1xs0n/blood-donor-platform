@@ -4,6 +4,14 @@ exports.createRequest = (req, res) => {
 
     const userId = req.user.id;
 
+    if (req.user.role === 'donor') {
+
+        return res.status(403).json({
+            message: 'Створення заявок доступне реципієнтам'
+        });
+
+    }
+
     const {
         title,
         description,
@@ -119,6 +127,14 @@ exports.respondToRequest = (req, res) => {
     const requestId = req.params.id;
 
     const userId = req.user.id;
+
+    if (req.user.role === 'recipient') {
+
+        return res.status(403).json({
+            message: 'Відповідати на заявки можуть лише донори'
+        });
+
+    }
 
     db.query(
         `SELECT

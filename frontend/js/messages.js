@@ -1,5 +1,5 @@
 const MESSAGES_API =
-'http://localhost:5000/api/messages';
+'https://blood-donor-platform-to9r.onrender.com/api/messages';
 
 const token =
 localStorage.getItem('token');

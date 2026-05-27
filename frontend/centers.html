@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="uk">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Де здати кров</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
+</head>
+
+<body class="public-body">
+
+<header class="public-nav">
+    <a class="public-logo" href="index.html">Blood Donor Platform</a>
+    <nav>
+        <a href="index.html">Головна</a>
+        <a href="about.html">Про нас</a>
+        <a href="centers.html">Де здати кров</a>
+        <a href="login.html">Увійти</a>
+    </nav>
+</header>
+
+<main class="public-page">
+    <section class="public-title">
+        <p class="section-eyebrow">Центри крові</p>
+        <h1>Знайдіть найближче місце для здачі крові</h1>
+        <p>На сторінці є карта, список центрів і пошук за назвою, містом або адресою.</p>
+    </section>
+
+    <section class="centers-layout">
+        <div>
+            <input
+                id="centers_search"
+                type="text"
+                placeholder="Пошук центру..."
+            >
+
+            <div id="centers_list" class="centers-list">
+                <p class="empty-state">Завантаження центрів...</p>
+            </div>
+        </div>
+
+        <div id="public_centers_map"></div>
+    </section>
+</main>
+
+<footer class="public-footer">
+    <strong>Blood Donor Platform</strong>
+    <span>Дані центрів редагуються в адмін-панелі.</span>
+</footer>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script src="js/centers.js"></script>
+
+</body>
+</html>

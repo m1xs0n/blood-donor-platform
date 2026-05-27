@@ -2,21 +2,10 @@
 <html lang="uk">
 
 <head>
-
     <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
-    <title>Кабінет донора</title>
-
-    <link
-        rel="stylesheet"
-        href="css/style.css"
-    >
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Кабінет користувача</title>
+    <link rel="stylesheet" href="css/style.css">
 </head>
 
 <body>
@@ -24,161 +13,83 @@
 <script src="js/navbar.js"></script>
 
 <div class="dashboard-container">
-
     <section class="donor-hero">
-
         <div>
-
-            <p class="section-eyebrow">
-                Кабінет донора
+            <p class="section-eyebrow" id="dashboard_role_title">
+                Кабінет
             </p>
 
             <h1 id="welcome_text">
                 Вітаємо
             </h1>
 
-            <p>
-                Керуйте профілем, переглядайте заявки та відстежуйте свої бронювання в одному місці.
+            <p id="dashboard_intro">
+                Керуйте профілем, заявками, повідомленнями та бронюваннями в одному місці.
             </p>
-
         </div>
 
         <button
+            id="hero_requests_button"
             class="hero-action"
             onclick="window.location.href='requests-list.html'"
         >
             Переглянути заявки
         </button>
-
     </section>
 
     <div class="stats-grid dashboard-stats">
-
         <div class="stat-card">
-
-            <span class="stat-label">
-                Активні заявки
-            </span>
-
-            <h2 id="requests_count">
-                0
-            </h2>
-
-            <p>
-                доступно для перегляду
-            </p>
-
+            <span class="stat-label">Активні заявки</span>
+            <h2 id="requests_count">0</h2>
+            <p>доступно для перегляду</p>
         </div>
 
-        <div class="stat-card">
-
-            <span class="stat-label">
-                Мої бронювання
-            </span>
-
-            <h2 id="bookings_count">
-                0
-            </h2>
-
-            <p>
-                запланованих записів
-            </p>
-
+        <div class="stat-card" id="bookings_stat">
+            <span class="stat-label">Мої бронювання</span>
+            <h2 id="bookings_count">0</h2>
+            <p>запланованих записів</p>
         </div>
 
-        <div class="stat-card blood-stat">
-
-            <span class="stat-label">
-                Група крові
-            </span>
-
-            <h2 id="blood_group_text">
-                -
-            </h2>
-
-            <p>
-                із резус фактором
-            </p>
-
+        <div class="stat-card blood-stat" id="blood_stat">
+            <span class="stat-label">Група крові</span>
+            <h2 id="blood_group_text">-</h2>
+            <p>із резус фактором</p>
         </div>
-
     </div>
 
     <div class="dashboard-content">
-
-        <section class="card profile-card">
-
+        <section
+            class="card profile-card"
+            id="donor_profile_section"
+        >
             <div class="card-header">
-
                 <div>
-
-                    <p class="section-eyebrow">
-                        Профіль
-                    </p>
-
-                    <h2>
-                        Дані донора
-                    </h2>
-
+                    <p class="section-eyebrow">Профіль</p>
+                    <h2>Дані донора</h2>
                 </div>
-
             </div>
 
             <div class="form-grid">
-
-                <input
-                    type="text"
-                    id="full_name"
-                    disabled
-                >
-
-                <input
-                    type="email"
-                    id="email"
-                    disabled
-                >
+                <input type="text" id="full_name" disabled>
+                <input type="email" id="email" disabled>
+                <input type="date" id="date_of_birth">
 
                 <select id="blood_group">
-
-                    <option value="">
-                        Група крові
-                    </option>
-
+                    <option value="">Група крові</option>
                     <option value="I">I</option>
                     <option value="II">II</option>
                     <option value="III">III</option>
                     <option value="IV">IV</option>
-
                 </select>
 
                 <select id="rh_factor">
-
-                    <option value="">
-                        Резус фактор
-                    </option>
-
-                    <option value="+">
-                        Позитивний (+)
-                    </option>
-
-                    <option value="-">
-                        Негативний (-)
-                    </option>
-
+                    <option value="">Резус фактор</option>
+                    <option value="+">Позитивний (+)</option>
+                    <option value="-">Негативний (-)</option>
                 </select>
 
-                <input
-                    type="text"
-                    id="city"
-                    placeholder="Місто"
-                >
-
-                <input
-                    type="text"
-                    id="phone"
-                    placeholder="Телефон"
-                >
-
+                <input type="text" id="city" placeholder="Місто">
+                <input type="text" id="phone" placeholder="Телефон">
             </div>
 
             <textarea
@@ -189,37 +100,39 @@
             <button onclick="saveProfile()">
                 Зберегти профіль
             </button>
-
         </section>
 
         <aside class="quick-panel">
-
             <section class="card">
-
-                <p class="section-eyebrow">
-                    Швидкий доступ
-                </p>
-
-                <h2>
-                    Дії
-                </h2>
+                <p class="section-eyebrow">Швидкий доступ</p>
+                <h2>Дії</h2>
 
                 <button
+                    id="quick_create_request"
                     onclick="window.location.href='requests.html'"
                 >
                     Створити заявку
                 </button>
 
                 <button
+                    id="quick_requests_list"
                     onclick="window.location.href='requests-list.html'"
                 >
                     Переглянути заявки
                 </button>
 
                 <button
+                    id="quick_bookings"
                     onclick="window.location.href='bookings-list.html'"
                 >
                     Мої бронювання
+                </button>
+
+                <button
+                    class="secondary-button"
+                    onclick="window.location.href='messages.html'"
+                >
+                    Повідомлення
                 </button>
 
                 <button
@@ -228,25 +141,17 @@
                 >
                     Карта центрів
                 </button>
-
             </section>
 
-            <section class="card dashboard-note">
-
-                <h2>
-                    Як зв'язатися по заявці?
-                </h2>
-
-                <p>
-                    Відкрийте список заявок і натисніть “Допомогти” біля потрібної заявки. Після цього створиться діалог у повідомленнях.
+            <section class="card dashboard-note" id="dashboard_note">
+                <h2>Як працювати із заявками?</h2>
+                <p id="dashboard_note_text">
+                    Відкрийте список заявок і натисніть “Допомогти” біля потрібної заявки.
+                    Після цього створиться діалог у повідомленнях.
                 </p>
-
             </section>
-
         </aside>
-
     </div>
-
 </div>
 
 <script src="js/dashboard.js"></script>

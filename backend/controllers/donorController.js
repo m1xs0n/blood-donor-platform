@@ -12,10 +12,12 @@ exports.getProfile = (req, res) => {
 
             donors.blood_group,
             donors.rh_factor,
+            donors.date_of_birth,
             donors.city,
             donors.phone,
             donors.health_status,
-            donors.last_donation_date
+            donors.last_donation_date,
+            users.role
 
         FROM users
 
@@ -46,6 +48,7 @@ exports.updateProfile = (req, res) => {
     const {
         blood_group,
         rh_factor,
+        date_of_birth,
         city,
         phone,
         health_status,
@@ -65,16 +68,18 @@ exports.updateProfile = (req, res) => {
                         user_id,
                         blood_group,
                         rh_factor,
+                        date_of_birth,
                         city,
                         phone,
                         health_status,
                         last_donation_date
                     )
-                    VALUES (?, ?, ?, ?, ?, ?, ?)`,
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
                     [
                         userId,
                         blood_group,
                         rh_factor,
+                        date_of_birth || null,
                         city,
                         phone,
                         health_status,
@@ -102,6 +107,7 @@ exports.updateProfile = (req, res) => {
                     SET
                         blood_group = ?,
                         rh_factor = ?,
+                        date_of_birth = ?,
                         city = ?,
                         phone = ?,
                         health_status = ?,
@@ -111,6 +117,7 @@ exports.updateProfile = (req, res) => {
                     [
                         blood_group,
                         rh_factor,
+                        date_of_birth || null,
                         city,
                         phone,
                         health_status,

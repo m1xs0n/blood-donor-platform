@@ -1,5 +1,5 @@
 const API_URL =
-'http://localhost:5000/api/bookings';
+'https://blood-donor-platform-to9r.onrender.com/api/bookings';
 
 const token =
 localStorage.getItem('token');
