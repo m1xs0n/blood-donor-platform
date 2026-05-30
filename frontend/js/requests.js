@@ -1,4 +1,4 @@
-const API_BASE_URL = 'https://blood-donor-platform-pzzi.onrender.com';
+const API_BASE_URL = 'https://blood-donor-platform-production-ebf8.up.railway.app';
 
 const API_URL =
 `${API_BASE_URL}/api/requests`;

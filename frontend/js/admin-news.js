@@ -1,4 +1,4 @@
-const NEWS_API = 'https://blood-donor-platform-pzzi.onrender.com';
+const NEWS_API = 'https://blood-donor-platform-production-ebf8.up.railway.app';
 
 const newsToken =
 localStorage.getItem('token');

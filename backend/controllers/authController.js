@@ -1,7 +1,9 @@
 const db = require('../config/db');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const transporter = require('../config/mailer');
+const {
+    sendEmail
+} = require('../config/mailer');
 
 require('dotenv').config();
 
@@ -44,21 +46,7 @@ const isValidDateOfBirth = (dateOfBirth) => {
 };
 
 const sendVerificationCode = async (email, verificationCode) => {
-    const emailUser =
-    String(process.env.EMAIL_USER || '').trim();
-
-    const emailPass =
-    String(process.env.EMAIL_PASS || '').replace(/\s/g, '');
-
-    if (
-        !emailUser ||
-        !emailPass
-    ) {
-        throw new Error('Email credentials are not configured');
-    }
-
-    await transporter.sendMail({
-        from: emailUser,
+    await sendEmail({
         to: email,
         subject: 'Код підтвердження Blood Donor Platform',
         html: `
@@ -76,8 +64,11 @@ exports.register = async (req, res) => {
             'REGISTER ENV CHECK:',
             {
                 emailConfigured: Boolean(
-                    process.env.EMAIL_USER &&
-                    process.env.EMAIL_PASS
+                    process.env.RESEND_API_KEY ||
+                    (
+                        process.env.EMAIL_USER &&
+                        process.env.EMAIL_PASS
+                    )
                 ),
                 jwtConfigured: Boolean(process.env.JWT_SECRET)
             }
@@ -262,6 +253,16 @@ exports.register = async (req, res) => {
                         verificationCode
                     }
                 );
+
+                const emailEnabled =
+                process.env.EMAIL_ENABLED === 'true';
+
+                if (!emailEnabled) {
+                    return res.status(201).json({
+                        message: 'Код підтвердження створено. Використайте код з повідомлення.',
+                        verificationCode
+                    });
+                }
 
                 try {
 
