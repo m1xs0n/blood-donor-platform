@@ -58,6 +58,177 @@ const sendVerificationCode = async (email, verificationCode) => {
     });
 };
 
+const completePendingRegistration = (
+    normalizedEmail,
+    res,
+    successMessage
+) => {
+    const pendingRegistration =
+    pendingRegistrations.get(normalizedEmail);
+
+    if (!pendingRegistration) {
+        return res.status(404).json({
+            message: 'Спочатку пройдіть реєстрацію'
+        });
+    }
+
+    const createUser = () => {
+        db.query(
+            `INSERT INTO users
+            (
+                full_name,
+                email,
+                password,
+                is_verified,
+                verification_code,
+                verification_attempts,
+                role
+            )
+            VALUES (?, ?, ?, true, NULL, 0, ?)`,
+            [
+                pendingRegistration.full_name,
+                pendingRegistration.email,
+                pendingRegistration.password,
+                pendingRegistration.role
+            ],
+            (insertErr, insertResult) => {
+
+                if (insertErr) {
+
+                    console.log(insertErr);
+
+                    return res.status(500).json({
+                        message: 'Помилка сервера'
+                    });
+
+                }
+
+                db.query(
+                    `INSERT INTO donors
+                    (
+                        user_id,
+                        blood_group,
+                        rh_factor,
+                        date_of_birth,
+                        city,
+                        phone,
+                        health_status
+                    )
+                    VALUES (?, ?, ?, ?, ?, ?, ?)`,
+                    [
+                        insertResult.insertId,
+                        pendingRegistration.blood_group,
+                        pendingRegistration.rh_factor,
+                        pendingRegistration.date_of_birth,
+                        pendingRegistration.city,
+                        pendingRegistration.phone,
+                        null
+                    ],
+                    (profileErr) => {
+
+                        if (profileErr) {
+
+                            console.log(profileErr);
+
+                            return res.status(500).json({
+                                message: 'Помилка створення профілю'
+                            });
+
+                        }
+
+                        pendingRegistrations.delete(normalizedEmail);
+
+                        const token =
+                        jwt.sign(
+                            {
+                                id: insertResult.insertId,
+                                role: pendingRegistration.role
+                            },
+                            process.env.JWT_SECRET,
+                            {
+                                expiresIn: '7d'
+                            }
+                        );
+
+                        return res.status(201).json({
+                            message: successMessage,
+                            token,
+                            user: {
+                                id: insertResult.insertId,
+                                full_name: pendingRegistration.full_name,
+                                email: pendingRegistration.email,
+                                role: pendingRegistration.role
+                            }
+                        });
+
+                    }
+                );
+
+            }
+        );
+    };
+
+    db.query(
+        'SELECT * FROM users WHERE email = ?',
+        [normalizedEmail],
+        (err, results) => {
+
+            if (err) {
+
+                console.log(err);
+
+                return res.status(500).json({
+                    message: 'Помилка сервера'
+                });
+
+            }
+
+            if (
+                results.length > 0 &&
+                results[0].is_verified
+            ) {
+
+                pendingRegistrations.delete(normalizedEmail);
+
+                return res.status(400).json({
+                    message: 'Email вже існує'
+                });
+
+            }
+
+            if (
+                results.length > 0 &&
+                !results[0].is_verified
+            ) {
+
+                return db.query(
+                    'DELETE FROM users WHERE email = ? AND is_verified = false',
+                    [normalizedEmail],
+                    (deleteErr) => {
+
+                        if (deleteErr) {
+
+                            console.log(deleteErr);
+
+                            return res.status(500).json({
+                                message: 'Помилка сервера'
+                            });
+
+                        }
+
+                        createUser();
+
+                    }
+                );
+
+            }
+
+            createUser();
+
+        }
+    );
+};
+
 exports.register = async (req, res) => {
     try {
         console.log(
@@ -258,10 +429,11 @@ exports.register = async (req, res) => {
                 process.env.EMAIL_ENABLED === 'true';
 
                 if (!emailEnabled) {
-                    return res.status(201).json({
-                        message: 'Код підтвердження створено. Використайте код з повідомлення.',
-                        verificationCode
-                    });
+                    return completePendingRegistration(
+                        normalizedEmail,
+                        res,
+                        'Email підтверджено автоматично'
+                    );
                 }
 
                 try {
@@ -278,11 +450,11 @@ exports.register = async (req, res) => {
                         mailError
                     );
 
-                    return res.status(201).json({
-                        message: 'Код створено, але пошта тимчасово недоступна. Використайте код з повідомлення.',
-                        verificationCode,
-                        error: mailError.message
-                    });
+                    return completePendingRegistration(
+                        normalizedEmail,
+                        res,
+                        'Пошту тимчасово недоступно, акаунт підтверджено автоматично'
+                    );
 
                 }
 

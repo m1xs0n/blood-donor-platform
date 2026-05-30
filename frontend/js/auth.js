@@ -206,6 +206,27 @@ async function register() {
 
     if (response.ok) {
 
+        if (data.token && data.user) {
+
+            localStorage.setItem(
+                'token',
+                data.token
+            );
+
+            localStorage.setItem(
+                'user',
+                JSON.stringify(data.user)
+            );
+
+            localStorage.removeItem(
+                'verification_email'
+            );
+
+            window.location.href = 'dashboard.html';
+
+            return;
+        }
+
         localStorage.setItem(
             'verification_email',
             email
