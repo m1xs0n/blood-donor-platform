@@ -241,27 +241,6 @@ exports.register = async (req, res) => {
                     verificationCode
                 );
 
-                try {
-
-                    await sendVerificationCode(
-                        normalizedEmail,
-                        verificationCode
-                    );
-
-                } catch (mailError) {
-
-                    console.error(
-                        'MAIL ERROR:',
-                        mailError
-                    );
-
-                    return res.status(500).json({
-                        message: 'Не вдалося надіслати код на пошту',
-                        error: mailError.message
-                    });
-
-                }
-
                 pendingRegistrations.set(
                     normalizedEmail,
                     {
@@ -283,6 +262,28 @@ exports.register = async (req, res) => {
                         verificationCode
                     }
                 );
+
+                try {
+
+                    await sendVerificationCode(
+                        normalizedEmail,
+                        verificationCode
+                    );
+
+                } catch (mailError) {
+
+                    console.error(
+                        'MAIL ERROR:',
+                        mailError
+                    );
+
+                    return res.status(201).json({
+                        message: 'Код створено, але пошта тимчасово недоступна. Використайте код з повідомлення.',
+                        verificationCode,
+                        error: mailError.message
+                    });
+
+                }
 
                 if (
                     results.length > 0 &&

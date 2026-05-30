@@ -205,7 +205,11 @@ async function register() {
     const data =
     await response.json();
 
-    alert(data.message);
+    alert(
+        data.verificationCode
+        ? `${data.message}\nКод: ${data.verificationCode}`
+        : data.message
+    );
 
     if (response.ok) {
 
