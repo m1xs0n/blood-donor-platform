@@ -44,6 +44,13 @@ const isValidDateOfBirth = (dateOfBirth) => {
 };
 
 const sendVerificationCode = async (email, verificationCode) => {
+    if (
+        !process.env.EMAIL_USER ||
+        !process.env.EMAIL_PASS
+    ) {
+        throw new Error('Email credentials are not configured');
+    }
+
     await transporter.sendMail({
         from: process.env.EMAIL_USER,
         to: email,

@@ -1,5 +1,14 @@
+const API_BASE_URL =
+window.API_BASE_URL ||
+(
+    window.location.hostname === 'localhost' ||
+    window.location.hostname === '127.0.0.1'
+    ? 'http://localhost:5000'
+    : 'https://blood-donor-platform-to9r.onrender.com'
+);
+
 const API_URL =
-'https://blood-donor-platform-to9r.onrender.com/api/requests';
+`${API_BASE_URL}/api/requests`;
 
 const token =
 localStorage.getItem('token');

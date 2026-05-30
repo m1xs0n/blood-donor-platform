@@ -1,0 +1,18 @@
+node:events:487
+      throw er; // Unhandled 'error' event
+      ^
+
+Error: Connection lost: The server closed the connection.
+    at Socket.<anonymous> (C:\Users\dream\Desktop\blood-donor-platform\node_modules\mysql2\lib\base\connection.js:122:31)
+    at Socket.emit (node:events:509:28)
+    at TCP.<anonymous> (node:net:350:12)
+Emitted 'error' event on Connection instance at:
+    at Connection._notifyError (C:\Users\dream\Desktop\blood-donor-platform\node_modules\mysql2\lib\base\connection.js:291:12)
+    at Socket.<anonymous> (C:\Users\dream\Desktop\blood-donor-platform\node_modules\mysql2\lib\base\connection.js:128:12)
+    at Socket.emit (node:events:509:28)
+    at TCP.<anonymous> (node:net:350:12) {
+  fatal: true,
+  code: 'PROTOCOL_CONNECTION_LOST'
+}
+
+Node.js v24.15.0

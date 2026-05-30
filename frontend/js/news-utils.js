@@ -3,7 +3,7 @@ window.API_BASE_URL ||
 (
     window.location.hostname === 'localhost' ||
     window.location.hostname === '127.0.0.1'
-    ? 'https://blood-donor-platform-to9r.onrender.com'
+    ? 'http://localhost:5000'
     : 'https://blood-donor-platform-to9r.onrender.com'
 );
 
