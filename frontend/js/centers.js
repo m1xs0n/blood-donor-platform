@@ -1,11 +1,4 @@
-const CENTERS_API =
-window.API_BASE_URL ||
-(
-    window.location.hostname === 'localhost' ||
-    window.location.hostname === '127.0.0.1'
-    ? 'http://localhost:5000'
-    : 'https://blood-donor-platform-8wlh.onrender.com'
-);
+const CENTERS_API = 'https://blood-donor-platform-8wlh.onrender.com';
 
 let centers = [];
 
