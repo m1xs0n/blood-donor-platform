@@ -44,15 +44,21 @@ const isValidDateOfBirth = (dateOfBirth) => {
 };
 
 const sendVerificationCode = async (email, verificationCode) => {
+    const emailUser =
+    String(process.env.EMAIL_USER || '').trim();
+
+    const emailPass =
+    String(process.env.EMAIL_PASS || '').replace(/\s/g, '');
+
     if (
-        !process.env.EMAIL_USER ||
-        !process.env.EMAIL_PASS
+        !emailUser ||
+        !emailPass
     ) {
         throw new Error('Email credentials are not configured');
     }
 
     await transporter.sendMail({
-        from: process.env.EMAIL_USER,
+        from: emailUser,
         to: email,
         subject: 'Код підтвердження Blood Donor Platform',
         html: `
@@ -66,6 +72,16 @@ const sendVerificationCode = async (email, verificationCode) => {
 
 exports.register = async (req, res) => {
     try {
+        console.log(
+            'REGISTER ENV CHECK:',
+            {
+                emailConfigured: Boolean(
+                    process.env.EMAIL_USER &&
+                    process.env.EMAIL_PASS
+                ),
+                jwtConfigured: Boolean(process.env.JWT_SECRET)
+            }
+        );
 
         const {
             full_name,
@@ -234,10 +250,14 @@ exports.register = async (req, res) => {
 
                 } catch (mailError) {
 
-                    console.log(mailError);
+                    console.error(
+                        'MAIL ERROR:',
+                        mailError
+                    );
 
                     return res.status(500).json({
-                        message: 'Не вдалося надіслати код на пошту'
+                        message: 'Не вдалося надіслати код на пошту',
+                        error: mailError.message
                     });
 
                 }
