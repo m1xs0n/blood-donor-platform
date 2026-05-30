@@ -448,6 +448,13 @@ function getInputType(column) {
 
 function renderAdminInput(column, value, isAuto) {
 
+    const isReadonly =
+    isAuto ||
+    column.name === 'created_at' ||
+    column.name === 'updated_at' ||
+    String(column.extra || '').toLowerCase().includes('on update') ||
+    String(column.defaultValue || '').toLowerCase().includes('current_timestamp');
+
     const referenceTable =
     getReferenceTable(column.name);
 
@@ -469,7 +476,7 @@ function renderAdminInput(column, value, isAuto) {
                     type="button"
                     class="secondary-button"
                     onclick="openReferencePicker('${column.name}')"
-                    ${isAuto ? 'disabled' : ''}
+                    ${isReadonly ? 'disabled' : ''}
                 >
                     Вибрати
                 </button>
@@ -479,7 +486,7 @@ function renderAdminInput(column, value, isAuto) {
                 type="hidden"
                 id="admin_field_${column.name}"
                 value="${escapeHtml(currentValue)}"
-                ${isAuto ? 'disabled' : ''}
+                ${isReadonly ? 'disabled' : ''}
             >
         `;
     }
@@ -492,7 +499,7 @@ function renderAdminInput(column, value, isAuto) {
         return `
             <select
                 id="admin_field_${column.name}"
-                ${isAuto ? 'disabled' : ''}
+                ${isReadonly ? 'disabled' : ''}
             >
                 <option value="">Не вказано</option>
                 ${options.map((option) => {
@@ -522,7 +529,7 @@ function renderAdminInput(column, value, isAuto) {
             type="${inputType}"
             id="admin_field_${column.name}"
             value="${escapeHtml(value)}"
-            ${isAuto ? 'disabled' : ''}
+            ${isReadonly ? 'disabled' : ''}
         >
     `;
 }

@@ -10,6 +10,7 @@ const getSchema = () => {
                 DATA_TYPE AS dataType,
                 COLUMN_KEY AS columnKey,
                 EXTRA AS extra,
+                COLUMN_DEFAULT AS columnDefault,
                 IS_NULLABLE AS isNullable
              FROM information_schema.columns
              WHERE TABLE_SCHEMA = DATABASE()
@@ -39,6 +40,7 @@ const getSchema = () => {
                         type: row.dataType,
                         key: row.columnKey,
                         extra: row.extra,
+                        defaultValue: row.columnDefault,
                         nullable: row.isNullable
                     });
 
@@ -75,27 +77,113 @@ const ensureTable = async (tableName) => {
     return schema[tableName];
 };
 
+const isAutoManagedColumn = (column) => {
+    const columnName =
+    String(column.name || '').toLowerCase();
+
+    const extra =
+    String(column.extra || '').toLowerCase();
+
+    const defaultValue =
+    String(column.defaultValue || '').toLowerCase();
+
+    return columnName === 'created_at' ||
+    columnName === 'updated_at' ||
+    extra.includes('auto_increment') ||
+    extra.includes('on update') ||
+    defaultValue.includes('current_timestamp');
+};
+
+const formatDateTimeForMysql = (value) => {
+
+    if (
+        value === null ||
+        value === undefined ||
+        value === ''
+    ) {
+
+        return null;
+
+    }
+
+    const date =
+    new Date(value);
+
+    if (Number.isNaN(date.getTime())) {
+
+        return value;
+
+    }
+
+    const pad = (number) => {
+        return String(number).padStart(2, '0');
+    };
+
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+};
+
+const normalizeValueForColumn = (column, value) => {
+
+    if (value === '') {
+
+        return null;
+
+    }
+
+    if (
+        column.type === 'datetime' ||
+        column.type === 'timestamp'
+    ) {
+
+        return formatDateTimeForMysql(value);
+
+    }
+
+    if (column.type === 'date') {
+
+        if (
+            value === null ||
+            value === undefined
+        ) {
+
+            return null;
+
+        }
+
+        return String(value).slice(0, 10);
+
+    }
+
+    return value;
+};
+
 const filterWritableData = (tableSchema, data) => {
 
     const allowedColumns =
     tableSchema.columns
     .filter((column) => {
-        return !column.extra.includes('auto_increment');
+        return !isAutoManagedColumn(column);
     })
-    .map((column) => {
-        return column.name;
-    });
+    .reduce((columns, column) => {
+
+        columns[column.name] =
+        column;
+
+        return columns;
+
+    }, {});
 
     const filtered = {};
 
     Object.keys(data || {}).forEach((key) => {
 
-        if (allowedColumns.includes(key)) {
+        if (allowedColumns[key]) {
 
             filtered[key] =
-            data[key] === ''
-            ? null
-            : data[key];
+            normalizeValueForColumn(
+                allowedColumns[key],
+                data[key]
+            );
 
         }
 
