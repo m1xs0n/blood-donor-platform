@@ -1,4 +1,4 @@
-const CENTERS_API = 'https://blood-donor-platform-8wlh.onrender.com';
+const CENTERS_API = 'https://blood-donor-platform-pzzi.onrender.com';
 
 let centers = [];
 

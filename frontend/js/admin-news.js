@@ -1,4 +1,4 @@
-const NEWS_API = 'https://blood-donor-platform-8wlh.onrender.com';
+const NEWS_API = 'https://blood-donor-platform-pzzi.onrender.com';
 
 const newsToken =
 localStorage.getItem('token');
