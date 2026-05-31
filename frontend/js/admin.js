@@ -1326,6 +1326,12 @@ async function saveAdminRow() {
 
     alert(result.message);
 
+    if (!response.ok) {
+
+        return;
+
+    }
+
     closeAdminForm();
 
     loadCurrentTable();

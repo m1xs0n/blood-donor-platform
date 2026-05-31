@@ -1,5 +1,54 @@
 const db = require('../config/db');
 
+const adminFieldLabels = {
+    id: 'ID запису',
+    user_id: 'ID користувача',
+    created_by: 'Автор заявки',
+    patient_id: 'Пацієнт / реципієнт',
+    hospital_name: 'Центр крові',
+    full_name: 'ПІП',
+    email: 'Email',
+    password: 'Пароль',
+    role: 'Роль користувача',
+    created_at: 'Дата створення',
+    updated_at: 'Дата оновлення',
+    verification_code: 'Код підтвердження',
+    is_verified: 'Email підтверджено',
+    verification_attempts: 'Спроби підтвердження',
+    blood_group: 'Група крові',
+    rh_factor: 'Резус фактор',
+    date_of_birth: 'Дата народження',
+    city: 'Місто',
+    phone: 'Телефон',
+    health_status: 'Стан здоровʼя',
+    last_donation_date: 'Остання здача крові',
+    title: 'Заголовок',
+    description: 'Опис',
+    urgency: 'Терміновість',
+    status: 'Статус',
+    request_id: 'Заявка',
+    center_id: 'Центр крові',
+    booking_date: 'Дата бронювання',
+    booking_time: 'Час бронювання',
+    name: 'Назва',
+    address: 'Адреса',
+    latitude: 'Широта',
+    longitude: 'Довгота',
+    sender_id: 'Відправник',
+    receiver_id: 'Отримувач',
+    type: 'Тип',
+    message: 'Повідомлення',
+    is_read: 'Прочитано',
+    summary: 'Короткий опис',
+    content: 'Текст',
+    image_url: 'Фото / шаблон',
+    external_url: 'Посилання'
+};
+
+const getFieldLabel = (fieldName) => {
+    return adminFieldLabels[fieldName] || fieldName;
+};
+
 const getSchema = () => {
     return new Promise((resolve, reject) => {
 
@@ -192,12 +241,133 @@ const filterWritableData = (tableSchema, data) => {
     return filtered;
 };
 
+const isEmptyAdminValue = (value) => {
+    return value === null ||
+    value === undefined ||
+    value === '';
+};
+
+const getMissingRequiredFields = (tableSchema, data) => {
+    return tableSchema.columns.filter((column) => {
+
+        if (isAutoManagedColumn(column)) {
+
+            return false;
+
+        }
+
+        if (
+            column.nullable !== 'NO' ||
+            column.defaultValue !== null
+        ) {
+
+            return false;
+
+        }
+
+        return isEmptyAdminValue(data[column.name]);
+
+    }).map((column) => {
+        return getFieldLabel(column.name);
+    });
+};
+
+const getEmptyRequiredFieldsFromData = (tableSchema, data) => {
+    return tableSchema.columns.filter((column) => {
+
+        if (
+            column.nullable !== 'NO' ||
+            !Object.prototype.hasOwnProperty.call(data, column.name)
+        ) {
+
+            return false;
+
+        }
+
+        return isEmptyAdminValue(data[column.name]);
+
+    }).map((column) => {
+        return getFieldLabel(column.name);
+    });
+};
+
+const getDatabaseErrorMessage = (err) => {
+
+    if (!err) {
+
+        return 'Помилка сервера';
+
+    }
+
+    const sqlMessage =
+    err.sqlMessage || err.message || '';
+
+    const fieldMatch =
+    sqlMessage.match(/(?:Column|Field) '([^']+)'/);
+
+    const fieldName =
+    fieldMatch ? fieldMatch[1] : null;
+
+    const fieldLabel =
+    fieldName ? getFieldLabel(fieldName) : null;
+
+    if (
+        err.code === 'ER_BAD_NULL_ERROR' ||
+        err.code === 'ER_NO_DEFAULT_FOR_FIELD'
+    ) {
+
+        return fieldLabel
+        ? `Заповніть поле: ${fieldLabel}`
+        : 'Заповніть обовʼязкові поля';
+
+    }
+
+    if (err.code === 'ER_DUP_ENTRY') {
+
+        return 'Такий запис уже існує. Перевірте унікальні поля, наприклад email або ID.';
+
+    }
+
+    if (
+        err.code === 'ER_NO_REFERENCED_ROW' ||
+        err.code === 'ER_NO_REFERENCED_ROW_2'
+    ) {
+
+        return 'Обраний повʼязаний запис не існує. Перевірте вибір користувача, заявки або центру крові.';
+
+    }
+
+    if (
+        err.code === 'ER_TRUNCATED_WRONG_VALUE' ||
+        err.code === 'ER_TRUNCATED_WRONG_VALUE_FOR_FIELD' ||
+        err.code === 'ER_WRONG_VALUE_FOR_TYPE'
+    ) {
+
+        return fieldLabel
+        ? `Некоректне значення для поля: ${fieldLabel}`
+        : 'Некоректне значення в одному з полів';
+
+    }
+
+    if (err.code === 'ER_DATA_TOO_LONG') {
+
+        return fieldLabel
+        ? `Значення для поля "${fieldLabel}" занадто довге`
+        : 'Одне зі значень занадто довге';
+
+    }
+
+    return err.status
+    ? err.message
+    : 'Помилка сервера';
+};
+
 const handleError = (res, err) => {
 
     console.log(err);
 
     res.status(err.status || 500).json({
-        message: err.message || 'Помилка сервера'
+        message: getDatabaseErrorMessage(err)
     });
 };
 
@@ -289,6 +459,17 @@ exports.createRow = async (req, res) => {
         const data =
         filterWritableData(tableSchema, req.body);
 
+        const missingFields =
+        getMissingRequiredFields(tableSchema, data);
+
+        if (missingFields.length > 0) {
+
+            return res.status(400).json({
+                message: `Заповніть поля: ${missingFields.join(', ')}`
+            });
+
+        }
+
         const columns =
         Object.keys(data);
 
@@ -367,6 +548,17 @@ exports.updateRow = async (req, res) => {
         filterWritableData(tableSchema, req.body);
 
         delete data[tableSchema.primaryKey];
+
+        const emptyRequiredFields =
+        getEmptyRequiredFieldsFromData(tableSchema, data);
+
+        if (emptyRequiredFields.length > 0) {
+
+            return res.status(400).json({
+                message: `Не можна залишати порожніми поля: ${emptyRequiredFields.join(', ')}`
+            });
+
+        }
 
         const columns =
         Object.keys(data);
