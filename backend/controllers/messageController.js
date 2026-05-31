@@ -17,7 +17,9 @@ const fetchUserMessages = (userId) => {
                 sender_donor.last_donation_date AS sender_last_donation_date,
                 receiver_donor.blood_group AS receiver_blood_group,
                 receiver_donor.rh_factor AS receiver_rh_factor,
-                receiver_donor.last_donation_date AS receiver_last_donation_date
+                receiver_donor.last_donation_date AS receiver_last_donation_date,
+                sender.role AS sender_role,
+                receiver.role AS receiver_role
              FROM notifications
              LEFT JOIN blood_requests
              ON notifications.request_id = blood_requests.id
@@ -92,6 +94,31 @@ exports.getConversations = async (req, res) => {
             ? row.receiver_last_donation_date
             : row.sender_last_donation_date;
 
+            const donorId =
+            row.sender_role === 'donor'
+            ? row.sender_id
+            : row.receiver_id;
+
+            const donorName =
+            row.sender_role === 'donor'
+            ? row.sender_name
+            : row.receiver_name;
+
+            const donorBloodGroup =
+            row.sender_role === 'donor'
+            ? row.sender_blood_group
+            : row.receiver_blood_group;
+
+            const donorRhFactor =
+            row.sender_role === 'donor'
+            ? row.sender_rh_factor
+            : row.receiver_rh_factor;
+
+            const donorLastDonationDate =
+            row.sender_role === 'donor'
+            ? row.sender_last_donation_date
+            : row.receiver_last_donation_date;
+
             const key =
             `${row.request_id}:${otherUserId}`;
 
@@ -108,6 +135,11 @@ exports.getConversations = async (req, res) => {
                     other_blood_group: otherBloodGroup,
                     other_rh_factor: otherRhFactor,
                     other_last_donation_date: otherLastDonationDate,
+                    donor_id: donorId,
+                    donor_name: donorName,
+                    donor_blood_group: donorBloodGroup,
+                    donor_rh_factor: donorRhFactor,
+                    donor_last_donation_date: donorLastDonationDate,
                     last_message: row.message,
                     last_message_at: row.created_at,
                     unread_count: 0

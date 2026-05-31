@@ -524,14 +524,67 @@ function renderAdminInput(column, value, isAuto) {
     const inputType =
     getInputType(column);
 
+    const inputValue =
+    getInputValueForType(inputType, value);
+
     return `
         <input
             type="${inputType}"
             id="admin_field_${column.name}"
-            value="${escapeHtml(value)}"
+            value="${escapeHtml(inputValue)}"
             ${isReadonly ? 'disabled' : ''}
         >
     `;
+}
+
+function getInputValueForType(inputType, value) {
+
+    if (value === null || value === undefined) {
+
+        return '';
+
+    }
+
+    if (inputType === 'date') {
+
+        const text =
+        String(value);
+
+        if (/^\d{4}-\d{2}-\d{2}/.test(text)) {
+
+            return text.slice(0, 10);
+
+        }
+
+        const date =
+        new Date(text);
+
+        if (!Number.isNaN(date.getTime())) {
+
+            const year =
+            date.getFullYear();
+
+            const month =
+            String(date.getMonth() + 1).padStart(2, '0');
+
+            const day =
+            String(date.getDate()).padStart(2, '0');
+
+            return `${year}-${month}-${day}`;
+
+        }
+
+        return '';
+
+    }
+
+    if (inputType === 'time') {
+
+        return String(value).slice(0, 5);
+
+    }
+
+    return valueToText(value);
 }
 
 function getTableLabel(tableName) {

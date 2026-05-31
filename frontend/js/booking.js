@@ -48,6 +48,27 @@ function getTodayDate() {
     return `${year}-${month}-${day}`;
 }
 
+function getTomorrowDate() {
+
+    const tomorrow =
+    new Date();
+
+    tomorrow.setDate(
+        tomorrow.getDate() + 1
+    );
+
+    const year =
+    tomorrow.getFullYear();
+
+    const month =
+    String(tomorrow.getMonth() + 1).padStart(2, '0');
+
+    const day =
+    String(tomorrow.getDate()).padStart(2, '0');
+
+    return `${year}-${month}-${day}`;
+}
+
 function daysBetween(dateValue, todayValue) {
 
     const first =
@@ -133,7 +154,7 @@ if (!selectedRequest) {
 
             document.getElementById(
                 'booking_date'
-            ).min = getTodayDate();
+            ).min = getTomorrowDate();
 
             loadDonationWarning();
 
@@ -237,10 +258,10 @@ async function createBooking() {
         return;
     }
 
-    if (booking_date < getTodayDate()) {
+    if (booking_date < getTomorrowDate()) {
 
         alert(
-            'Не можна створити бронювання в минулому'
+            'Бронювання доступне тільки з наступного дня'
         );
 
         return;

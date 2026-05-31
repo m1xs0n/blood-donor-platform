@@ -16,8 +16,28 @@ const getTodayDate = () => {
     return `${year}-${month}-${day}`;
 };
 
-const isPastDate = (date) => {
-    return date < getTodayDate();
+const getTomorrowDate = () => {
+
+    const tomorrow = new Date();
+
+    tomorrow.setDate(
+        tomorrow.getDate() + 1
+    );
+
+    const year =
+    tomorrow.getFullYear();
+
+    const month =
+    String(tomorrow.getMonth() + 1).padStart(2, '0');
+
+    const day =
+    String(tomorrow.getDate()).padStart(2, '0');
+
+    return `${year}-${month}-${day}`;
+};
+
+const isTooEarlyDate = (date) => {
+    return date < getTomorrowDate();
 };
 
 exports.createBooking = (req, res) => {
@@ -43,10 +63,10 @@ exports.createBooking = (req, res) => {
 
     }
 
-    if (isPastDate(booking_date)) {
+    if (isTooEarlyDate(booking_date)) {
 
         return res.status(400).json({
-            message: 'Не можна створити бронювання в минулому'
+            message: 'Бронювання доступне тільки з наступного дня'
         });
 
     }
@@ -151,10 +171,10 @@ exports.updateBooking = (req, res) => {
 
     }
 
-    if (isPastDate(booking_date)) {
+    if (isTooEarlyDate(booking_date)) {
 
         return res.status(400).json({
-            message: 'Не можна перенести бронювання в минуле'
+            message: 'Бронювання доступне тільки з наступного дня'
         });
 
     }

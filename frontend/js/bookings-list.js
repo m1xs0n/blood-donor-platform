@@ -44,6 +44,27 @@ function getTodayDate() {
     return `${year}-${month}-${day}`;
 }
 
+function getTomorrowDate() {
+
+    const tomorrow =
+    new Date();
+
+    tomorrow.setDate(
+        tomorrow.getDate() + 1
+    );
+
+    const year =
+    tomorrow.getFullYear();
+
+    const month =
+    String(tomorrow.getMonth() + 1).padStart(2, '0');
+
+    const day =
+    String(tomorrow.getDate()).padStart(2, '0');
+
+    return `${year}-${month}-${day}`;
+}
+
 function formatDateForView(dateValue) {
 
     const inputDate =
@@ -274,7 +295,7 @@ function openBookingDrawer(bookingId) {
     document.getElementById(
         'edit_booking_date'
     ).min =
-    getTodayDate();
+    getTomorrowDate();
 
     document.getElementById(
         'edit_booking_date'
@@ -342,10 +363,10 @@ async function saveBookingChanges() {
         return;
     }
 
-    if (booking_date < getTodayDate()) {
+    if (booking_date < getTomorrowDate()) {
 
         alert(
-            'Не можна перенести бронювання в минуле'
+            'Бронювання доступне тільки з наступного дня'
         );
 
         return;

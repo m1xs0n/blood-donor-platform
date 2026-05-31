@@ -62,13 +62,13 @@ function isBloodCompatible(conversation) {
     };
 
     const donorGroup =
-    String(conversation.other_blood_group || '').toUpperCase();
+    String(conversation.donor_blood_group || '').toUpperCase();
 
     const requestGroup =
     String(conversation.request_blood_group || '').toUpperCase();
 
     const donorRh =
-    String(conversation.other_rh_factor || '');
+    String(conversation.donor_rh_factor || '');
 
     const requestRh =
     String(conversation.request_rh_factor || '');
@@ -94,7 +94,7 @@ function isBloodCompatible(conversation) {
 function renderDonorInfo(conversation) {
 
     const days =
-    daysSince(conversation.other_last_donation_date);
+    daysSince(conversation.donor_last_donation_date);
 
     const isTooSoon =
     days !== null &&
@@ -117,12 +117,12 @@ function renderDonorInfo(conversation) {
         <div class="chat-donor-info ${isTooSoon ? 'too-soon' : ''}">
             <div>
                 <strong>Донор:</strong>
-                ${escapeHtml(conversation.other_user_name || '-')}
+                ${escapeHtml(conversation.donor_name || '-')}
             </div>
 
             <div>
                 <strong>Кров донора:</strong>
-                ${escapeHtml(conversation.other_blood_group || '-')}${escapeHtml(conversation.other_rh_factor || '')}
+                ${escapeHtml(conversation.donor_blood_group || '-')}${escapeHtml(conversation.donor_rh_factor || '')}
             </div>
 
             <div>
@@ -138,8 +138,8 @@ function renderDonorInfo(conversation) {
             <div>
                 <strong>Остання донація:</strong>
                 ${
-                    conversation.other_last_donation_date
-                    ? `${String(conversation.other_last_donation_date).slice(0, 10)} (${days} дн. тому)`
+                    conversation.donor_last_donation_date
+                    ? `${String(conversation.donor_last_donation_date).slice(0, 10)} (${days} дн. тому)`
                     : 'немає даних'
                 }
             </div>
@@ -445,7 +445,7 @@ async function confirmDonation() {
 
             body: JSON.stringify({
                 request_id: activeConversation.request_id,
-                donor_id: activeConversation.other_user_id
+                donor_id: activeConversation.donor_id
             })
         }
     );
