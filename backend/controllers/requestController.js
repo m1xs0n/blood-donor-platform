@@ -18,6 +18,7 @@ exports.createRequest = (req, res) => {
         blood_group,
         rh_factor,
         city,
+        hospital_name,
         urgency
     } = req.body;
 
@@ -31,9 +32,10 @@ exports.createRequest = (req, res) => {
             blood_group,
             rh_factor,
             city,
+            hospital_name,
             urgency
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
             userId,
             userId,
@@ -42,6 +44,7 @@ exports.createRequest = (req, res) => {
             blood_group,
             rh_factor,
             city,
+            hospital_name || null,
             urgency
         ],
         (err) => {
@@ -67,6 +70,11 @@ exports.getRequests = (req, res) => {
     db.query(
         `SELECT
             blood_requests.*,
+            blood_requests.hospital_name
+            AS hospital_id,
+
+            donation_centers.name
+            AS hospital_name,
 
             users.full_name
             AS patient_name,
@@ -83,6 +91,10 @@ exports.getRequests = (req, res) => {
         LEFT JOIN donors
         ON blood_requests.patient_id =
         donors.user_id
+
+        LEFT JOIN donation_centers
+        ON CAST(blood_requests.hospital_name AS UNSIGNED) =
+        donation_centers.id
 
         ORDER BY blood_requests.created_at DESC
         LIMIT 0, 25;`,
@@ -140,7 +152,8 @@ exports.respondToRequest = (req, res) => {
         `SELECT
             id,
             created_by,
-            title
+            title,
+            hospital_name
          FROM blood_requests
          WHERE id = ?`,
         [requestId],
@@ -209,7 +222,8 @@ exports.respondToRequest = (req, res) => {
                         return res.json({
                             message: 'Діалог вже існує',
                             request_id: Number(requestId),
-                            other_user_id: request.created_by
+                            other_user_id: request.created_by,
+                            center_id: request.hospital_name || null
                         });
 
                     }
@@ -249,7 +263,8 @@ exports.respondToRequest = (req, res) => {
                             res.json({
                                 message: 'Діалог створено',
                                 request_id: Number(requestId),
-                                other_user_id: request.created_by
+                                other_user_id: request.created_by,
+                                center_id: request.hospital_name || null
                             });
 
                         }

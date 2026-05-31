@@ -3,6 +3,9 @@ const API_BASE_URL = 'https://blood-donor-platform-production-ebf8.up.railway.ap
 const API_URL =
 `${API_BASE_URL}/api/requests`;
 
+const CENTERS_API_URL =
+`${API_BASE_URL}/api/bookings/centers`;
+
 const token =
 localStorage.getItem('token');
 
@@ -47,6 +50,11 @@ async function createRequest() {
         'urgency'
     ).value;
 
+    const hospital_name =
+    document.getElementById(
+        'hospital_name'
+    ).value;
+
     if (
         !title ||
         !description ||
@@ -84,6 +92,7 @@ async function createRequest() {
                     blood_group,
                     rh_factor,
                     city,
+                    hospital_name,
                     urgency
                 })
             }
@@ -106,6 +115,10 @@ async function createRequest() {
             'city'
         ).value = '';
 
+        document.getElementById(
+            'hospital_name'
+        ).value = '';
+
     } catch (error) {
 
         console.log(error);
@@ -113,6 +126,56 @@ async function createRequest() {
         alert(
             'Помилка створення заявки'
         );
+    }
+}
+
+async function loadRequestCenters() {
+
+    const select =
+    document.getElementById(
+        'hospital_name'
+    );
+
+    if (!select) {
+
+        return;
+    }
+
+    try {
+
+        const response =
+        await fetch(
+            CENTERS_API_URL,
+            {
+                headers: {
+                    Authorization:
+                    `Bearer ${token}`
+                }
+            }
+        );
+
+        const centers =
+        await response.json();
+
+        if (!Array.isArray(centers)) {
+
+            return;
+        }
+
+        centers.forEach((center) => {
+
+            select.innerHTML += `
+                <option value="${center.id}">
+                    ${center.name} (${center.city || '-'})
+                </option>
+            `;
+
+        });
+
+    } catch (error) {
+
+        console.log(error);
+
     }
 }
 
@@ -125,3 +188,5 @@ if (requestUser && requestUser.role === 'donor') {
     window.location.href =
     'dashboard.html';
 }
+
+loadRequestCenters();

@@ -71,7 +71,8 @@ exports.createBooking = (req, res) => {
 
     }
 
-    db.query(
+    const insertBooking = () => {
+        db.query(
         `INSERT INTO bookings
         (
             user_id,
@@ -107,6 +108,52 @@ exports.createBooking = (req, res) => {
 
         }
     );
+    };
+
+    if (request_id) {
+
+        db.query(
+            `SELECT hospital_name
+             FROM blood_requests
+             WHERE id = ?`,
+            [request_id],
+            (requestErr, requestRows) => {
+
+                if (requestErr) {
+
+                    console.log(requestErr);
+
+                    return res.status(500).json({
+                        message: 'Помилка сервера'
+                    });
+
+                }
+
+                const requiredCenter =
+                requestRows[0] &&
+                requestRows[0].hospital_name;
+
+                if (
+                    requiredCenter &&
+                    String(requiredCenter) !== String(center_id)
+                ) {
+
+                    return res.status(400).json({
+                        message: 'Для цієї заявки центр крові вже обраний реципієнтом'
+                    });
+
+                }
+
+                insertBooking();
+
+            }
+        );
+
+        return;
+
+    }
+
+    insertBooking();
 
 };
 

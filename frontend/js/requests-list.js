@@ -340,6 +340,13 @@ function renderRequests(requests) {
                     </strong>
                 </p>
 
+                <p style="margin-top:10px;">
+                    Центр крові:
+                    <strong>
+                        ${request.hospital_name || 'обирає донор'}
+                    </strong>
+                </p>
+
                 ${
                     currentUser && currentUser.role === 'recipient'
                     ? `
@@ -383,6 +390,7 @@ function filterRequests() {
             request.city,
             request.patient_city,
             request.patient_name,
+            request.hospital_name,
             request.blood_group,
             request.rh_factor
         ]
@@ -443,6 +451,21 @@ async function respondRequest(requestId) {
         'selected_chat_user',
         data.other_user_id
     );
+
+    if (data.center_id) {
+
+        localStorage.setItem(
+            'selected_request_center_id',
+            data.center_id
+        );
+
+    } else {
+
+        localStorage.removeItem(
+            'selected_request_center_id'
+        );
+
+    }
 
     window.location.href =
     'booking.html';

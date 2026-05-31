@@ -31,6 +31,11 @@ localStorage.getItem(
     'selected_chat_user'
 );
 
+const selectedRequestCenter =
+localStorage.getItem(
+    'selected_request_center_id'
+);
+
 function getTodayDate() {
 
     const today =
@@ -210,7 +215,9 @@ async function loadCenters() {
         'center_id'
     );
 
-    select.innerHTML = `
+    select.innerHTML = selectedRequestCenter
+    ? ''
+    : `
         <option value="">
             Оберіть центр донації
         </option>
@@ -225,6 +232,30 @@ async function loadCenters() {
         `;
 
     });
+
+    if (selectedRequestCenter) {
+
+        select.value =
+        selectedRequestCenter;
+
+        select.disabled =
+        true;
+
+        const requestText =
+        document.getElementById(
+            'selected_request_text'
+        );
+
+        const selectedCenter =
+        centers.find((center) => {
+            return String(center.id) === String(selectedRequestCenter);
+        });
+
+        requestText.innerText += selectedCenter
+        ? ` · Центр: ${selectedCenter.name}`
+        : ' · Центр обрано реципієнтом';
+
+    }
 
 }
 
@@ -304,6 +335,10 @@ async function createBooking() {
 
     localStorage.removeItem(
         'selected_request'
+    );
+
+    localStorage.removeItem(
+        'selected_request_center_id'
     );
 
     if (
