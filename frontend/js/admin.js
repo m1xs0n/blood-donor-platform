@@ -445,6 +445,11 @@ function getInputType(column) {
         return 'email';
     }
 
+    if (column.name === 'password') {
+
+        return 'password';
+    }
+
     return 'text';
 }
 
@@ -1020,7 +1025,7 @@ function openAdminForm(rowIndex = null) {
         .includes('auto_increment');
 
         const value =
-        editingRow
+        editingRow && column.name !== 'password'
         ? valueToText(editingRow[column.name])
         : '';
 
@@ -1272,6 +1277,16 @@ function collectAdminFormData() {
         );
 
         if (input && !input.disabled) {
+
+            if (
+                editingRow &&
+                column.name === 'password' &&
+                input.value === ''
+            ) {
+
+                return;
+
+            }
 
             data[column.name] =
             parseReferenceValue(

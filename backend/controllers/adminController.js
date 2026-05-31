@@ -1,4 +1,5 @@
 const db = require('../config/db');
+const bcrypt = require('bcrypt');
 
 const adminFieldLabels = {
     id: 'ID запису',
@@ -47,6 +48,14 @@ const adminFieldLabels = {
 
 const getFieldLabel = (fieldName) => {
     return adminFieldLabels[fieldName] || fieldName;
+};
+
+const isValidEmail = (email) => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email || ''));
+};
+
+const isValidPassword = (password) => {
+    return String(password || '').length >= 6;
 };
 
 const getSchema = () => {
@@ -362,6 +371,65 @@ const getDatabaseErrorMessage = (err) => {
     : 'Помилка сервера';
 };
 
+const prepareAdminData = async (
+    tableName,
+    data,
+    isEditing
+) => {
+
+    if (tableName !== 'users') {
+
+        return data;
+
+    }
+
+    if (Object.prototype.hasOwnProperty.call(data, 'email')) {
+
+        const normalizedEmail =
+        String(data.email || '').trim().toLowerCase();
+
+        if (!isValidEmail(normalizedEmail)) {
+
+            const error =
+            new Error('Введіть коректний email');
+
+            error.status = 400;
+            throw error;
+
+        }
+
+        data.email =
+        normalizedEmail;
+
+    }
+
+    if (Object.prototype.hasOwnProperty.call(data, 'password')) {
+
+        if (isEditing && isEmptyAdminValue(data.password)) {
+
+            delete data.password;
+            return data;
+
+        }
+
+        if (!isValidPassword(data.password)) {
+
+            const error =
+            new Error('Пароль має містити щонайменше 6 символів');
+
+            error.status = 400;
+            throw error;
+
+        }
+
+        data.password =
+        await bcrypt.hash(data.password, 10);
+
+    }
+
+    return data;
+};
+
 const handleError = (res, err) => {
 
     console.log(err);
@@ -456,7 +524,7 @@ exports.createRow = async (req, res) => {
         const tableSchema =
         await ensureTable(tableName);
 
-        const data =
+        let data =
         filterWritableData(tableSchema, req.body);
 
         const missingFields =
@@ -469,6 +537,13 @@ exports.createRow = async (req, res) => {
             });
 
         }
+
+        data =
+        await prepareAdminData(
+            tableName,
+            data,
+            false
+        );
 
         const columns =
         Object.keys(data);
@@ -544,10 +619,17 @@ exports.updateRow = async (req, res) => {
 
         }
 
-        const data =
+        let data =
         filterWritableData(tableSchema, req.body);
 
         delete data[tableSchema.primaryKey];
+
+        data =
+        await prepareAdminData(
+            tableName,
+            data,
+            true
+        );
 
         const emptyRequiredFields =
         getEmptyRequiredFieldsFromData(tableSchema, data);
